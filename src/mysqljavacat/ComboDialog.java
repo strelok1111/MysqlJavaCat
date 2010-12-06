@@ -105,12 +105,11 @@ public class ComboDialog extends javax.swing.JDialog {
         }
         x = x + edit.getLocationOnScreen().x;
         y = y + edit.getLocationOnScreen().y;
-        this.setBounds(x, y, 200, 300);        
+        this.setBounds(x, y, 400, 300);
         jList1.setListData(getCoplList(s).toArray());
         if(jList1.getModel().getSize() > 0){
             this.setVisible(true);
             jList1.setSelectedIndex(0);
-            edit.requestFocus();
             compl_string = s;
         }else{
             this.setVisible(false);

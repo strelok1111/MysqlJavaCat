@@ -301,6 +301,7 @@ public class MysqlJavaCatView extends FrameView {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        resultTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         resultTable.setName("resultTable"); // NOI18N
         jScrollPane2.setViewportView(resultTable);
 
@@ -586,7 +587,6 @@ public class MysqlJavaCatView extends FrameView {
                     for(int i = 0 ; i < DatabaseTree.getModel().getChildCount(root);i = i +1){
                         if(DatabaseTree.getModel().getChild(root, i).toString().equals(selected_db)){
                             db_node = (TreeNode) DatabaseTree.getModel().getChild(root, i);
-                            //System.out.println(db_node);
                             for(int k = 0; k < DatabaseTree.getModel().getChildCount(db_node);k = k + 1){
                                 tables_nodes.put(DatabaseTree.getModel().getChild(db_node, k).toString(), (TreeNode)DatabaseTree.getModel().getChild(db_node,k));
                             }

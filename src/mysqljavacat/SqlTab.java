@@ -92,7 +92,7 @@ public class SqlTab extends JScrollPane{
             public void caretUpdate(CaretEvent e) {
                 String lastword = "";
                 String input = editor.getText().replace("\r\n", "\n").substring(0, e.getDot());
-                Matcher m = Pattern.compile("(\\S+)\\z").matcher(input);
+                Matcher m = Pattern.compile("(\\w+)\\z").matcher(input);
                 if(m.find())
                     lastword = m.group(1);
 /*
@@ -109,6 +109,7 @@ public class SqlTab extends JScrollPane{
                     combo_dialog.hideVithPrepared();
                 if(combo_dialog.getPrepared()){
                     combo_dialog.showFor(lastword);
+                    editor.grabFocus();
                 }
             }
         };
@@ -178,6 +179,7 @@ public class SqlTab extends JScrollPane{
                         e.setKeyCode(0);
                         combo_dialog.setSelectedInEdit();
                     }
+                    editor.grabFocus();
                 }
             }
 
