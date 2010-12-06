@@ -27,6 +27,9 @@
       <SubComponents>
         <Container class="javax.swing.JToolBar" name="jToolBar3">
           <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="null"/>
+            </Property>
             <Property name="rollover" type="boolean" value="true"/>
             <Property name="name" type="java.lang.String" value="jToolBar3" noResource="true"/>
           </Properties>
@@ -95,6 +98,9 @@
         </Container>
         <Container class="javax.swing.JSplitPane" name="jSplitPane1">
           <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="null"/>
+            </Property>
             <Property name="name" type="java.lang.String" value="jSplitPane1" noResource="true"/>
           </Properties>
 
@@ -144,13 +150,13 @@
                         <DimensionLayout dim="0">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
-                              <Component id="jScrollPane2" alignment="0" pref="530" max="32767" attributes="0"/>
+                              <Component id="jScrollPane2" alignment="0" pref="534" max="32767" attributes="0"/>
                           </Group>
                         </DimensionLayout>
                         <DimensionLayout dim="1">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="1" attributes="0">
-                                  <Component id="jScrollPane2" pref="380" max="32767" attributes="0"/>
+                                  <Component id="jScrollPane2" pref="382" max="32767" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
                               </Group>
@@ -199,7 +205,7 @@
                                       <Component id="requestTime" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="231" max="-2" attributes="0"/>
                                       <Component id="rowCount" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace pref="287" max="32767" attributes="0"/>
+                                      <EmptySpace pref="291" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                             </DimensionLayout>
@@ -247,12 +253,12 @@
                       <Layout>
                         <DimensionLayout dim="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <EmptySpace min="0" pref="530" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="534" max="32767" attributes="0"/>
                           </Group>
                         </DimensionLayout>
                         <DimensionLayout dim="1">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <EmptySpace min="0" pref="408" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="410" max="32767" attributes="0"/>
                           </Group>
                         </DimensionLayout>
                       </Layout>
@@ -287,6 +293,7 @@
                     <Property name="name" type="java.lang.String" value="DatabaseTree" noResource="true"/>
                   </Properties>
                   <Events>
+                    <EventHandler event="treeExpanded" listener="javax.swing.event.TreeExpansionListener" parameters="javax.swing.event.TreeExpansionEvent" handler="DatabaseTreeTreeExpanded"/>
                     <EventHandler event="valueChanged" listener="javax.swing.event.TreeSelectionListener" parameters="javax.swing.event.TreeSelectionEvent" handler="DatabaseTreeValueChanged"/>
                   </Events>
                 </Component>

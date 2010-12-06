@@ -25,9 +25,11 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.event.TreeSelectionEvent;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import jsyntaxpane.DefaultSyntaxKit;
 import org.jdesktop.application.Task;
 
@@ -38,6 +40,7 @@ public class MysqlJavaCatView extends FrameView {
     private MysqlJavaCatApp application;
     private String selected_db;
     private HashMap<String,HashMap<String,ArrayList<String>>> db_tables_fields;
+    private HashMap<String,Boolean> db_map_set = new HashMap<String,Boolean>();
     private SqlTabbedPane tabs;
     private final Timer messageTimer;
     private final Timer busyIconTimer;
@@ -219,6 +222,7 @@ public class MysqlJavaCatView extends FrameView {
 
         mainPanel.setName("mainPanel"); // NOI18N
 
+        jToolBar3.setBorder(null);
         jToolBar3.setRollover(true);
         jToolBar3.setName("jToolBar3"); // NOI18N
 
@@ -272,6 +276,7 @@ public class MysqlJavaCatView extends FrameView {
         });
         jToolBar3.add(RunButton);
 
+        jSplitPane1.setBorder(null);
         jSplitPane1.setName("jSplitPane1"); // NOI18N
 
         horisontalSplit.setBorder(null);
@@ -316,7 +321,7 @@ public class MysqlJavaCatView extends FrameView {
                 .addComponent(requestTime)
                 .addGap(231, 231, 231)
                 .addComponent(rowCount)
-                .addContainerGap(287, Short.MAX_VALUE))
+                .addContainerGap(291, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -332,12 +337,12 @@ public class MysqlJavaCatView extends FrameView {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 534, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 382, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -350,11 +355,11 @@ public class MysqlJavaCatView extends FrameView {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 530, Short.MAX_VALUE)
+            .addGap(0, 534, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 408, Short.MAX_VALUE)
+            .addGap(0, 410, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab(resourceMap.getString("jPanel3.TabConstraints.tabTitle"), jPanel3); // NOI18N
@@ -368,6 +373,13 @@ public class MysqlJavaCatView extends FrameView {
 
         DatabaseTree.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         DatabaseTree.setName("DatabaseTree"); // NOI18N
+        DatabaseTree.addTreeExpansionListener(new javax.swing.event.TreeExpansionListener() {
+            public void treeCollapsed(javax.swing.event.TreeExpansionEvent evt) {
+            }
+            public void treeExpanded(javax.swing.event.TreeExpansionEvent evt) {
+                DatabaseTreeTreeExpanded(evt);
+            }
+        });
         DatabaseTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
             public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
                 DatabaseTreeValueChanged(evt);
@@ -545,45 +557,62 @@ public class MysqlJavaCatView extends FrameView {
         application.show(confDialog);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
+    private void DatabaseTreeTreeExpanded(javax.swing.event.TreeExpansionEvent evt) {//GEN-FIRST:event_DatabaseTreeTreeExpanded
+        TreeSelectionEvent event = new TreeSelectionEvent(DatabaseTree, evt.getPath(), true, null, null);
+        DatabaseTreeValueChanged(event);
+    }//GEN-LAST:event_DatabaseTreeTreeExpanded
+
     public void proxyRunConnect(){
         connectButtonActionPerformed(null);
     }
 
     private void upadateFiedlsCache(final boolean force){
-        Task task = new Task(application) {
-            @Override
-            protected Object doInBackground() throws Exception {
-                progressBar.setVisible(true);
-                RunButton.setEnabled(false);
-                databaseCombo.setEnabled(false);
-                DatabaseTree.setEnabled(false);
-                statusAnimationLabel.setIcon(busyIcons[0]);
-                progressBar.setIndeterminate(false);
-                progressBar.setMinimum(0);
-                Set<String> tables_list= db_tables_fields.get(selected_db).keySet();
-                progressBar.setMaximum(tables_list.size());
-                for( String table : tables_list){
-                    if(force || db_tables_fields.get(selected_db).get(table).isEmpty()){
-                        ArrayList<Object> tables_local = application.getCol(application.executeSql("SHOW COLUMNS FROM " + table),"Field");
-                        for(Object field : tables_local){
-                            db_tables_fields.get(selected_db).get(table).add(field.toString());
+        if(force || db_map_set.get(selected_db) == null || !db_map_set.get(selected_db)){
+            Task task = new Task(application) {
+                @Override
+                protected Object doInBackground() throws Exception {
+                    progressBar.setVisible(true);
+                    RunButton.setEnabled(false);
+                    databaseCombo.setEnabled(false);
+                    DatabaseTree.setEnabled(false);
+                    statusAnimationLabel.setIcon(busyIcons[0]);
+                    progressBar.setIndeterminate(false);
+                    progressBar.setMinimum(0);
+                    ArrayList<ArrayList<Object>> fields_list= application.getRows(application.executeSql("SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + selected_db + "'"));
+                    progressBar.setMaximum(fields_list.size());
+                    TreeNode root  = (TreeNode)DatabaseTree.getModel().getRoot();
+                    TreeNode db_node;
+                    HashMap<String,TreeNode> tables_nodes = new HashMap<String,TreeNode>();
+                    for(int i = 0 ; i < DatabaseTree.getModel().getChildCount(root);i = i +1){
+                        if(DatabaseTree.getModel().getChild(root, i).toString().equals(selected_db)){
+                            db_node = (TreeNode) DatabaseTree.getModel().getChild(root, i);
+                            //System.out.println(db_node);
+                            for(int k = 0; k < DatabaseTree.getModel().getChildCount(db_node);k = k + 1){
+                                tables_nodes.put(DatabaseTree.getModel().getChild(db_node, k).toString(), (TreeNode)DatabaseTree.getModel().getChild(db_node,k));
+                            }
+                            break;
                         }
+                    }                    
+                    for( ArrayList<Object> field : fields_list){
+                        db_tables_fields.get(selected_db).get(field.get(0).toString()).add(field.get(1).toString());
+                        statusMessageLabel.setText("Table scan:"+field.get(0).toString());
+                        progressBar.setValue(progressBar.getValue() + 1);
+                        ((DefaultMutableTreeNode)tables_nodes.get(field.get(0).toString())).add(new DefaultMutableTreeNode(field.get(1).toString()));
                     }
-                    statusMessageLabel.setText("Table scan:"+table);
-                    progressBar.setValue(progressBar.getValue() + 1);
-                }
-                progressBar.setVisible(false);
-                statusAnimationLabel.setIcon(idleIcon);
-                statusMessageLabel.setText(null);
+                    progressBar.setVisible(false);
+                    statusAnimationLabel.setIcon(idleIcon);
+                    statusMessageLabel.setText(null);
 
-                RunButton.setEnabled(true);
-                databaseCombo.setEnabled(true);
-                DatabaseTree.setEnabled(true);
-                disconnectButton.setEnabled(true);
-                return null;
-            }
-        };
-        task.execute();
+                    RunButton.setEnabled(true);
+                    databaseCombo.setEnabled(true);
+                    DatabaseTree.setEnabled(true);
+                    disconnectButton.setEnabled(true);
+                    db_map_set.put(selected_db,true);
+                    return null;
+                }
+            };
+            task.execute();
+        }
     }
 
     private void updateTree(){

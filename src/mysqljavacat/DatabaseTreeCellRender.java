@@ -19,6 +19,7 @@ class DatabaseTreeCellRender extends DefaultTreeCellRenderer {
     Icon database_icon = new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/database.png"));
     Icon databases_icon = new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/databases.png"));
     Icon table_icon = new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/table.png"));
+    Icon field_icon = new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/textfield.png"));
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus) {
@@ -33,6 +34,9 @@ class DatabaseTreeCellRender extends DefaultTreeCellRenderer {
         } else if(((DefaultMutableTreeNode)((DefaultMutableTreeNode)node.getParent()).getParent()).isRoot()){
             setIcon(table_icon);
             setDisabledIcon(table_icon);
+        } else if (        ((DefaultMutableTreeNode)(       (DefaultMutableTreeNode)((DefaultMutableTreeNode)node.getParent()).getParent()       ).getParent()).isRoot()         ){
+            setIcon(field_icon);
+            setDisabledIcon(field_icon);
         }
 
         return this;
