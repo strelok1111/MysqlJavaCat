@@ -109,7 +109,6 @@ public class SqlTab extends JScrollPane{
                     combo_dialog.hideVithPrepared();
                 if(combo_dialog.getPrepared()){
                     combo_dialog.showFor(lastword);
-                    editor.grabFocus();
                 }
             }
         };
