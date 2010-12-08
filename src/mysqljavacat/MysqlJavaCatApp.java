@@ -175,13 +175,12 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         ArrayList<ArrayList<Object>> out_array = new ArrayList<ArrayList<Object>>();
         if(res == null)
             return out_array;
-        ArrayList<String> cols = getCols(res);
         try{
             int det_stoper = 0;
             while(res.next() && det_stoper < 30000){
                 ArrayList<Object> row = new ArrayList<Object>();
-                for(String col : cols){
-                    row.add(res.getObject(col));
+                for(int i = 1; i <= res.getMetaData().getColumnCount() ; i = i + 1){
+                    row.add(res.getObject(i));
                 }
                 out_array.add(row);
                 det_stoper = det_stoper + 1;
