@@ -119,6 +119,21 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         }
     }
 
+    public Object executeCustom(String sql){
+        Object rs = null;
+        try{
+            Statement stmt = dbConnection.createStatement();
+            if(stmt.execute(sql)){
+                rs = stmt.getResultSet();
+            }else{
+                rs = stmt.getUpdateCount();
+            }
+        }catch(SQLException e){
+            showError(e.toString());
+        }
+        return rs;
+    }
+
     public ResultSet executeSql(String sql){
         ResultSet rs = null;
         try{
@@ -126,8 +141,9 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             rs = stmt.executeQuery(sql);
         }catch(SQLException e){
             showError(e.toString());
+        }finally{
+            return rs;
         }
-        return rs;
     }
     public ArrayList<Object> getCol(ResultSet res,String col){
         ArrayList<Object> out_array = new ArrayList<Object>();
@@ -160,12 +176,14 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             return out_array;
         ArrayList<String> cols = getCols(res);
         try{
-            while(res.next()){
+            int det_stoper = 0;
+            while(res.next() && det_stoper < 30000){
                 ArrayList<Object> row = new ArrayList<Object>();
                 for(String col : cols){
                     row.add(res.getObject(col));
                 }
                 out_array.add(row);
+                det_stoper = det_stoper + 1;
             }
         }catch(Exception e){
             e.printStackTrace();

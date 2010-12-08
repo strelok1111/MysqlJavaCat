@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JEditorPane;
 import javax.swing.JList;
@@ -49,10 +48,10 @@ public class ComboDialog extends javax.swing.JDialog {
     public JList getComboList(){
         return jList1;
     }
-    private void FilterAddList(ArrayList<String> list,Set<String> input,String filter){
+    private void FilterAddList(ArrayList<String> list,ArrayList<Object> input,String filter){
         Set<String> set = new TreeSet<String>();
-        for(String s : input)
-                set.add(s);
+        for(Object s : input)
+                set.add(s.toString());
         if(filter == null){
             for(String s : set)
                 list.add(s);
@@ -68,31 +67,30 @@ public class ComboDialog extends javax.swing.JDialog {
     public ArrayList<String> getCoplList(String input){
         ArrayList<String> out = new ArrayList<String>();
         MysqlJavaCatView main_frame = (MysqlJavaCatView)MysqlJavaCatApp.getApplication().getMainView();
-        HashMap<String, HashMap<String, ArrayList<String>>> db_map = main_frame.getDbMap();
-        String cur_db = main_frame.getSelectedDb();
+        HashMap<String, DatabaseObj> db_map = main_frame.getDbMap();
+        DatabaseObj cur_db = main_frame.getSelectedDb();
         String [] parts = input.split("\\.");
         if(input.length() == 0){
-            FilterAddList(out,db_map.get(cur_db).keySet(),null);
-            FilterAddList(out,db_map.keySet(),null);
+            FilterAddList(out,new ArrayList<Object>(cur_db.getTables()),null);
+            FilterAddList(out,new ArrayList<Object>(db_map.keySet()),null);
         }else if(parts.length == 1 && !input.endsWith(".")){
-            FilterAddList(out,db_map.get(cur_db).keySet(),parts[0]);
-            FilterAddList(out,db_map.keySet(),parts[0]);
+            FilterAddList(out,new ArrayList<Object>(cur_db.getTables()),parts[0]);
+            FilterAddList(out,new ArrayList<Object>(db_map.keySet()),parts[0]);
         }else if(parts.length == 1 && input.endsWith(".")){
-            if(db_map.get(cur_db).get(parts[0]) != null)
-                FilterAddList(out,new HashSet<String>(db_map.get(cur_db).get(parts[0])),null);
+            FilterAddList(out,new ArrayList<Object>(cur_db.getTable(parts[0]).getFields()),null);
             if(db_map.get(parts[0]) != null)
-                FilterAddList(out,db_map.get(parts[0]).keySet(),null);
+                FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),null);
         }else if(parts.length == 2 && !input.endsWith(".")){
-            if(db_map.get(cur_db).get(parts[0]) != null)
-                FilterAddList(out,new HashSet<String>(db_map.get(cur_db).get(parts[0])),parts[1]);
+            if(cur_db.getTable(parts[0]) != null)
+                FilterAddList(out,new ArrayList<Object>(cur_db.getTable(parts[0]).getFields()),parts[1]);
             if(db_map.get(parts[0]) != null)
-                FilterAddList(out,new HashSet<String>(db_map.get(cur_db).get(parts[0])),parts[1]);
+                FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),parts[1]);
         }else if(parts.length == 2 && input.endsWith(".")){
-            if(db_map.get(parts[0]) != null && db_map.get(parts[0]).get(parts[1]) != null)
-                FilterAddList(out,new HashSet<String>(db_map.get(parts[0]).get(parts[1])),null);                
+            if(db_map.get(parts[0]) != null && !db_map.get(parts[0]).getTables().isEmpty())
+                FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),null);
         }else if(parts.length == 3 && !input.endsWith(".")){
-            if(db_map.get(parts[0]) != null && db_map.get(parts[0]).get(parts[1]) != null)
-                FilterAddList(out,new HashSet<String>(db_map.get(parts[0]).get(parts[1])),parts[2]);
+            if(db_map.get(parts[0]) != null && !db_map.get(parts[0]).getTables().isEmpty())
+                FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),parts[2]);
         }
 
         return out;
