@@ -4,6 +4,7 @@
 
 package mysqljavacat;
 
+import mysqljavacat.dialogs.ErrorDialog;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Window;

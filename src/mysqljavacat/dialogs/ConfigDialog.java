@@ -9,9 +9,11 @@
  * Created on Nov 25, 2010, 3:16:13 PM
  */
 
-package mysqljavacat;
+package mysqljavacat.dialogs;
 
 import java.util.Properties;
+import mysqljavacat.MysqlJavaCatApp;
+import mysqljavacat.MysqlJavaCatView;
 
 /**
  *

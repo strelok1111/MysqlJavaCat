@@ -5,6 +5,7 @@
 
 package mysqljavacat;
 
+import mysqljavacat.dialogs.ComboDialog;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -92,19 +93,9 @@ public class SqlTab extends JScrollPane{
             public void caretUpdate(CaretEvent e) {
                 String lastword = "";
                 String input = editor.getText().replace("\r\n", "\n").substring(0, e.getDot());
-                Matcher m = Pattern.compile("(\\w+)\\z").matcher(input);
+                Matcher m = Pattern.compile("([.\\w]+)\\z").matcher(input);
                 if(m.find())
                     lastword = m.group(1);
-/*
-                System.out.println("----------------------------------------E");
-                System.out.println(e.getDot());
-                System.out.println(editor.getText().substring(0, e.getDot()));
-                System.out.println("----------------------------------------I");
-                System.out.println(input);
-                System.out.println("----------------------------------------L");
-                System.out.println(lastword);
-                System.out.println("----------------------------------------");
- */
                 if(combo_dialog.isVisible() && lastword.equals(""))
                     combo_dialog.hideVithPrepared();
                 if(combo_dialog.getPrepared()){
@@ -199,7 +190,6 @@ public class SqlTab extends JScrollPane{
         tabCloseButton.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ae) {
             if(sqlTab.getTabCount() == 1){
-                sqlTab.resetTabCount();
                 sqlTab.createTab();
             }
             sqlTab.remove(getSqlTab());

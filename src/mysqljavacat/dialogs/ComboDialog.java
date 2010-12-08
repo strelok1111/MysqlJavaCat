@@ -9,16 +9,21 @@
  * Created on Nov 30, 2010, 3:51:02 PM
  */
 
-package mysqljavacat;
+package mysqljavacat.dialogs;
 
+import mysqljavacat.utils.StringComparator;
+import mysqljavacat.databaseobjects.DatabaseObj;
+import mysqljavacat.databaseobjects.FuncObj;
+import mysqljavacat.renders.ComboCompleteRender;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
 import javax.swing.JEditorPane;
 import javax.swing.JList;
+import mysqljavacat.MysqlJavaCatApp;
+import mysqljavacat.MysqlJavaCatView;
+import mysqljavacat.databaseobjects.TableObj;
 
 /**
  *
@@ -42,42 +47,69 @@ public class ComboDialog extends javax.swing.JDialog {
     public ComboDialog(JEditorPane editor) {
         super(MysqlJavaCatApp.getFrameFor(editor), false);
         edit = editor;
-        initComponents();        
+        initComponents();
+        jList1.setCellRenderer(new ComboCompleteRender());
         this.setVisible(false);
     }
     public JList getComboList(){
         return jList1;
     }
-    private void FilterAddList(ArrayList<String> list,ArrayList<Object> input,String filter){
-        Set<String> set = new TreeSet<String>();
-        for(Object s : input)
-                set.add(s.toString());
+    private void FilterAddList(ArrayList<Object> list,ArrayList<Object> input,String filter){
+        Collections.sort(input,new StringComparator());
         if(filter == null){
-            for(String s : set)
+            for(Object s : input)
                 list.add(s);
         }else{
             Pattern p = Pattern.compile("^" + Pattern.quote(filter),Pattern.CASE_INSENSITIVE);
-            for(String s : set){
-                if(p.matcher(s).find()){
+            for(Object s : input){
+                if(p.matcher(s.toString()).find()){
                     list.add(s);
                 }
             }
         }
     }
-    public ArrayList<String> getCoplList(String input){
-        ArrayList<String> out = new ArrayList<String>();
+    public ArrayList<Object> getQueryTables(DatabaseObj db){
+        ArrayList<Object> out = new ArrayList<Object>();
+        String [] words = edit.getText().split("\\s+");
+        for(String s : words)
+            if(db.getTable(s) != null)
+                out.add(db.getTable(s));
+        return out;
+    }
+    public ArrayList<Object> getCoplList(String input){
+        ArrayList<Object> out = new ArrayList<Object>();
         MysqlJavaCatView main_frame = (MysqlJavaCatView)MysqlJavaCatApp.getApplication().getMainView();
         HashMap<String, DatabaseObj> db_map = main_frame.getDbMap();
         DatabaseObj cur_db = main_frame.getSelectedDb();
         String [] parts = input.split("\\.");
+        ArrayList<Object> query_tables = getQueryTables(cur_db);
         if(input.length() == 0){
+            if(query_tables.size() == 1){
+                FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),null);
+                //out.add(null);
+            }
+            if(!query_tables.isEmpty()){
+                FilterAddList(out,query_tables,null);
+                //out.add(null);
+            }
             FilterAddList(out,new ArrayList<Object>(cur_db.getTables()),null);
-            FilterAddList(out,new ArrayList<Object>(db_map.keySet()),null);
+            FilterAddList(out,new ArrayList<Object>(FuncObj.getFucList()),null);
+            FilterAddList(out,new ArrayList<Object>(db_map.values()),null);
         }else if(parts.length == 1 && !input.endsWith(".")){
+            if(query_tables.size() == 1){
+                FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),parts[0]);
+                //out.add(null);
+            }
+            if (!query_tables.isEmpty()) {
+                FilterAddList(out,query_tables,parts[0]);
+                //out.add(null);
+            }
             FilterAddList(out,new ArrayList<Object>(cur_db.getTables()),parts[0]);
-            FilterAddList(out,new ArrayList<Object>(db_map.keySet()),parts[0]);
-        }else if(parts.length == 1 && input.endsWith(".")){
-            FilterAddList(out,new ArrayList<Object>(cur_db.getTable(parts[0]).getFields()),null);
+            FilterAddList(out,new ArrayList<Object>(FuncObj.getFucList()),parts[0]);
+            FilterAddList(out,new ArrayList<Object>(db_map.values()),parts[0]);
+        }else if(parts.length == 1 && input.endsWith(".")){            
+            if(cur_db.getTable(parts[0]) != null)
+                FilterAddList(out,new ArrayList<Object>(cur_db.getTable(parts[0]).getFields()),null);
             if(db_map.get(parts[0]) != null)
                 FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),null);
         }else if(parts.length == 2 && !input.endsWith(".")){
@@ -86,11 +118,11 @@ public class ComboDialog extends javax.swing.JDialog {
             if(db_map.get(parts[0]) != null)
                 FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),parts[1]);
         }else if(parts.length == 2 && input.endsWith(".")){
-            if(db_map.get(parts[0]) != null && !db_map.get(parts[0]).getTables().isEmpty())
-                FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),null);
+            if(db_map.get(parts[0]) != null && db_map.get(parts[0]).getTable(parts[1]) != null)
+                FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTable(parts[1]).getFields()),null);
         }else if(parts.length == 3 && !input.endsWith(".")){
-            if(db_map.get(parts[0]) != null && !db_map.get(parts[0]).getTables().isEmpty())
-                FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),parts[2]);
+            if(db_map.get(parts[0]) != null && db_map.get(parts[0]).getTable(parts[1]) != null)
+                FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTable(parts[1]).getFields()),parts[2]);
         }
 
         return out;
@@ -108,6 +140,7 @@ public class ComboDialog extends javax.swing.JDialog {
         if(jList1.getModel().getSize() > 0){
             this.setVisible(true);
             jList1.setSelectedIndex(0);
+            jList1.ensureIndexIsVisible(0);
             compl_string = s;
         }else{
             this.setVisible(false);

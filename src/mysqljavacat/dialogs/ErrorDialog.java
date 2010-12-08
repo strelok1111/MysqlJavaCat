@@ -1,15 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * ErrorDialog.java
- *
- * Created on Nov 23, 2010, 11:37:26 PM
- */
-
-package mysqljavacat;
+package mysqljavacat.dialogs;
 
 /**
  *

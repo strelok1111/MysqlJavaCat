@@ -4,6 +4,13 @@
 
 package mysqljavacat;
 
+import mysqljavacat.dialogs.MysqlJavaCatAboutBox;
+import mysqljavacat.dialogs.ConfigDialog;
+import mysqljavacat.databaseobjects.DatabaseObj;
+import mysqljavacat.databaseobjects.TableObj;
+import mysqljavacat.databaseobjects.FieldObj;
+import mysqljavacat.renders.ColoredTableCellRenderer;
+import mysqljavacat.renders.DatabaseTreeCellRender;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import org.jdesktop.application.Action;

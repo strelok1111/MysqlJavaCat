@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package mysqljavacat;
+package mysqljavacat.renders;
 
 import java.awt.Component;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -11,11 +11,14 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import mysqljavacat.databaseobjects.DatabaseObj;
+import mysqljavacat.databaseobjects.FieldObj;
+import mysqljavacat.databaseobjects.TableObj;
 /**
  *
  * @author strelok
  */
-class DatabaseTreeCellRender extends DefaultTreeCellRenderer {   
+public class DatabaseTreeCellRender extends DefaultTreeCellRenderer {
     Icon databases_icon = new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/databases.png"));
 
     @Override
