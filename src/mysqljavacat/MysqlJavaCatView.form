@@ -38,7 +38,9 @@
           <SubComponents>
             <Component class="javax.swing.JButton" name="connectButton">
               <Properties>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="connectButton.icon"/>
                 <Property name="text" type="java.lang.String" resourceKey="connectButton.text"/>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="connectButton.toolTipText"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
                 <Property name="name" type="java.lang.String" value="connectButton" noResource="true"/>
@@ -50,7 +52,9 @@
             </Component>
             <Component class="javax.swing.JButton" name="disconnectButton">
               <Properties>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="disconnectButton.icon"/>
                 <Property name="text" type="java.lang.String" resourceKey="disconnectButton.text"/>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="disconnectButton.toolTipText"/>
                 <Property name="enabled" type="boolean" value="false"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -83,7 +87,9 @@
             </Component>
             <Component class="javax.swing.JButton" name="RunButton">
               <Properties>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="RunButton.icon"/>
                 <Property name="text" type="java.lang.String" resourceKey="RunButton.text"/>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="RunButton.toolTipText"/>
                 <Property name="enabled" type="boolean" value="false"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>

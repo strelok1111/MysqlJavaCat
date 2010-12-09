@@ -288,7 +288,9 @@ public class MysqlJavaCatView extends FrameView {
         jToolBar3.setName("jToolBar3"); // NOI18N
 
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(mysqljavacat.MysqlJavaCatApp.class).getContext().getResourceMap(MysqlJavaCatView.class);
+        connectButton.setIcon(resourceMap.getIcon("connectButton.icon")); // NOI18N
         connectButton.setText(resourceMap.getString("connectButton.text")); // NOI18N
+        connectButton.setToolTipText(resourceMap.getString("connectButton.toolTipText")); // NOI18N
         connectButton.setFocusable(false);
         connectButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         connectButton.setName("connectButton"); // NOI18N
@@ -300,7 +302,9 @@ public class MysqlJavaCatView extends FrameView {
         });
         jToolBar3.add(connectButton);
 
+        disconnectButton.setIcon(resourceMap.getIcon("disconnectButton.icon")); // NOI18N
         disconnectButton.setText(resourceMap.getString("disconnectButton.text")); // NOI18N
+        disconnectButton.setToolTipText(resourceMap.getString("disconnectButton.toolTipText")); // NOI18N
         disconnectButton.setEnabled(false);
         disconnectButton.setFocusable(false);
         disconnectButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -324,7 +328,9 @@ public class MysqlJavaCatView extends FrameView {
         });
         jToolBar3.add(databaseCombo);
 
+        RunButton.setIcon(resourceMap.getIcon("RunButton.icon")); // NOI18N
         RunButton.setText(resourceMap.getString("RunButton.text")); // NOI18N
+        RunButton.setToolTipText(resourceMap.getString("RunButton.toolTipText")); // NOI18N
         RunButton.setEnabled(false);
         RunButton.setFocusable(false);
         RunButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
