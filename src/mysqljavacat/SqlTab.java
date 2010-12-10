@@ -192,8 +192,7 @@ public class SqlTab extends JScrollPane{
             if(sqlTab.getTabCount() == 1){
                 sqlTab.createTab();
             }
-            sqlTab.remove(getSqlTab());
-            MysqlJavaCatApp.getApplication().deleteFile(new File("current",file_name));
+            close();
           }
         });
         tab_label = new JLabel();
@@ -202,7 +201,10 @@ public class SqlTab extends JScrollPane{
         tab_header.add(tab_label);
         tab_header.add(tabCloseButton);
     }
-
+    public void close(){
+        sqlTab.remove(getSqlTab());
+        MysqlJavaCatApp.getApplication().deleteFile(new File("current",file_name));
+    }
     public String getFilename(){
         return file_name;
     }

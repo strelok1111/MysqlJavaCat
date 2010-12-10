@@ -177,14 +177,12 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         if(res == null)
             return out_array;
         try{
-            int det_stoper = 0;
-            while(res.next() && det_stoper < 30000){
+            while(res.next()){
                 ArrayList<Object> row = new ArrayList<Object>();
                 for(int i = 1; i <= res.getMetaData().getColumnCount() ; i = i + 1){
                     row.add(res.getObject(i));
                 }
                 out_array.add(row);
-                det_stoper = det_stoper + 1;
             }
         }catch(Exception e){
             e.printStackTrace();

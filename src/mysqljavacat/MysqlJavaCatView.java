@@ -103,6 +103,8 @@ public class MysqlJavaCatView extends FrameView {
                 if(e.getID() == KeyEvent.KEY_PRESSED){
                     if(e.getKeyCode() == 84 && e.isControlDown()){
                         tabs.createTab();
+                    }else if(e.getKeyCode() == 87 && e.isControlDown()){
+                        tabs.getSelectedtab().close();
                     }else if(e.getKeyCode() == 120){
                         RunButtonActionPerformed(null);
                     }else if(e.getKeyCode() == 27){
@@ -177,7 +179,7 @@ public class MysqlJavaCatView extends FrameView {
                 if(e.getClickCount() == 2){
                     int x = e.getX();
                     int y = e.getY();
-                    JTree tree = (JTree)e.getSource();
+                    JTree tree = (JTree)e.getSource();                    
                     TreePath path = tree.getPathForLocation(x, y);
                     if (path == null)
                             return;
@@ -602,6 +604,7 @@ public class MysqlJavaCatView extends FrameView {
     }//GEN-LAST:event_connectButtonActionPerformed
 
     private void RunButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RunButtonActionPerformed
+
         queryTask = new Task(application) {
             private Statement stmt;
             private void openGui(){
@@ -621,74 +624,102 @@ public class MysqlJavaCatView extends FrameView {
             @Override
             protected Object doInBackground() throws Exception {
                 closeGui();
-                if(application.getConnection() == null || tabs.getCurrEditorPane().getText().isEmpty()){
-                    return null;
-                }
-                javax.swing.table.DefaultTableModel defaultColumnModel = new javax.swing.table.DefaultTableModel();
-                Long time = System.currentTimeMillis();
                 Object res = null;
+                if(application.getConnection() == null || tabs.getCurrEditorPane().getText().isEmpty()){
+                    return res;
+                }                
+                Long time = System.currentTimeMillis();
+                
                 stmt = application.getConnection().createStatement();
+                stmt.setFetchSize(Integer.MIN_VALUE);
+                
                 try{                    
                     if(stmt.execute(tabs.getCurrEditorPane().getText())){
                         res = stmt.getResultSet();
                     }else{
                         res = stmt.getUpdateCount();
                     }
-                }catch(SQLException e){                    
-                    res = null;
-                    resultTable.setModel(defaultColumnModel);
+                }catch(SQLException e){
+                    stmt.close();
+                    openGui();
+                    resultTable.setModel(new javax.swing.table.DefaultTableModel());
                     if(e.getErrorCode() != 1317){
                         application.showError(e.getMessage());
-                    }
-                    openGui();                    
+                    }                    
                 }
-                if(res == null)
-                    return null;
-
-
                 Long milisec = System.currentTimeMillis() - time;
                 tabs.getSelectedtab().setRequestTime(milisec);
                 Float sec = milisec.floatValue() / 1000;
-                ArrayList<ArrayList<Object>> result = new ArrayList<ArrayList<Object>>();
-                if(res.getClass() == com.mysql.jdbc.JDBC4ResultSet.class){
-                    for(String col : application.getCols((ResultSet)res)){
-                        defaultColumnModel.addColumn(col);
-                    }
-                    result = application.getRows((ResultSet)res);
-                }else{
-                    defaultColumnModel.addColumn("Rows Affected");
-                    ArrayList<Object> single_cell = new ArrayList<Object>();
-                    single_cell.add(res);
-                    result.add(single_cell);
-                }
-                tabs.getSelectedtab().setRowCount(result.size());
-                requestTime.setText("Request time: " + sec.toString() + " sec");
-                rowCount.setText("Row count: " + new Integer(result.size()).toString());
-                for(ArrayList<Object> row : result){
-                    defaultColumnModel.addRow(row.toArray());
-                }
-                resultTable.setModel(defaultColumnModel);
-                TableColumnModel columns = resultTable.getColumnModel();
-                for (int i = columns.getColumnCount() - 1; i >= 0; --i){
-                    columns.getColumn(i).setPreferredWidth(200);
-                }
-                tabs.getSelectedtab().setResultColModel(defaultColumnModel);
-                resultTable.getTableHeader().setReorderingAllowed(false);
-                openGui();
-                return null;
+                requestTime.setText("Request time: " + sec.toString() + " sec");                
+                return res;
             }
             @Override
             public void cancelled() {
-                openGui();
                 try {
                     stmt.cancel();
                     stmt.close();
-                    stmt = null;
-                    Runtime.getRuntime().gc();
+                    openGui();
                 } catch (SQLException ex) {
                     Logger.getLogger(MysqlJavaCatView.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+     
+            @Override
+            protected void succeeded(Object res_in){
+                final Object res = res_in;
+                if(res == null)
+                    return;
+                Task fetch_task = new Task(application) {
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        javax.swing.table.DefaultTableModel defaultColumnModel = new javax.swing.table.DefaultTableModel();
+                        int size = 0;
+                        if(res.getClass() == com.mysql.jdbc.JDBC4ResultSet.class){
+                            ResultSet r1 = (ResultSet)res;                            
+                            int col_count = r1.getMetaData().getColumnCount();
+                            for(int i = 1;i <= col_count;i = i + 1){
+                                defaultColumnModel.addColumn(r1.getMetaData().getColumnLabel(i));
+                            }
+                            while(r1.next()){
+                                size = size + 1;
+                                Object [] arr = new Object[col_count];
+                                for(int i = 1; i <= col_count ; i = i + 1){
+                                    arr[i-1] = r1.getObject(i);
+                                }
+                                defaultColumnModel.addRow(arr);
+                            }
+                        }else{
+                            defaultColumnModel.addColumn("Rows Affected");
+                            ArrayList<Object> single_cell = new ArrayList<Object>();
+                            single_cell.add(res);
+                            size = 1;
+                            defaultColumnModel.addRow(single_cell.toArray());
+                        }
+                        tabs.getSelectedtab().setRowCount(size);
+                        rowCount.setText("Row count: " + new Integer(size).toString());
+                        resultTable.setModel(defaultColumnModel);
+                        TableColumnModel columns = resultTable.getColumnModel();
+                        for (int i = columns.getColumnCount() - 1; i >= 0; --i){
+                            columns.getColumn(i).setPreferredWidth(200);
+                        }
+                        tabs.getSelectedtab().setResultColModel(defaultColumnModel);
+                        resultTable.getTableHeader().setReorderingAllowed(false);
+                        return null;
+                    }
+                    @Override
+                    protected void finished() {
+                        try {
+                            stmt.close();
+                            openGui();
+                        } catch (SQLException ex) {
+                            Logger.getLogger(MysqlJavaCatView.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                };
+                application.getContext().getTaskService().execute(fetch_task);
+                application.getContext().getTaskMonitor().setForegroundTask(fetch_task);
+            }
+
         };
 
         application.getContext().getTaskService().execute(queryTask);
@@ -752,6 +783,7 @@ public class MysqlJavaCatView extends FrameView {
                 protected Object doInBackground() throws Exception {
                     RunButton.setEnabled(false);
                     databaseCombo.setEnabled(false);
+                    disconnectButton.setEnabled(false);
                     DatabaseTree.setEnabled(false);
                     ArrayList<ArrayList<Object>> fields_list = application.getRows(application.executeSql("SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + selected_db + "'"));
                     for( ArrayList<Object> field : fields_list){                        
@@ -780,6 +812,7 @@ public class MysqlJavaCatView extends FrameView {
             protected Object doInBackground() throws Exception {
                 DatabaseTree.setModel(null);
                 DatabaseTree.setEnabled(false);
+                RunButton.setEnabled(false);
                 javax.swing.tree.DefaultMutableTreeNode rootNode = new javax.swing.tree.DefaultMutableTreeNode("Databases");
                 DefaultComboBoxModel combo_model = new DefaultComboBoxModel();
                 ArrayList<ArrayList<Object>> all_databases  =  application.getRows(application.executeSql("SHOW DATABASES"));
