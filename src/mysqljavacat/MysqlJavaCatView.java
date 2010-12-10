@@ -4,6 +4,8 @@
 
 package mysqljavacat;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mysqljavacat.dialogs.MysqlJavaCatAboutBox;
 import mysqljavacat.dialogs.ConfigDialog;
 import mysqljavacat.databaseobjects.DatabaseObj;
@@ -24,6 +26,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.DefaultComboBoxModel;
@@ -49,7 +53,7 @@ import org.jdesktop.application.Task;
  * The application's main frame.
  */
 public class MysqlJavaCatView extends FrameView {
-    private MysqlJavaCatApp application;
+    private MysqlJavaCatApp application = MysqlJavaCatApp.getApplication();
     private DatabaseObj selected_db;
     private HashMap<String,DatabaseObj> databases = new HashMap<String,DatabaseObj>();
     private SqlTabbedPane tabs;
@@ -58,6 +62,7 @@ public class MysqlJavaCatView extends FrameView {
     private final Icon idleIcon;
     private final Icon[] busyIcons = new Icon[15];
     private int busyIconIndex = 0;
+    private Task queryTask;
 
     private JDialog aboutBox;
     private JDialog confDialog;
@@ -85,8 +90,7 @@ public class MysqlJavaCatView extends FrameView {
     }
 
     public MysqlJavaCatView(SingleFrameApplication app) {
-        super(app);
-        application = MysqlJavaCatApp.getApplication();
+        super(app);        
         DefaultSyntaxKit.initKit();
         initComponents();
         getFrame().setTitle("Mysql Java Based Object Browser");
@@ -121,8 +125,19 @@ public class MysqlJavaCatView extends FrameView {
         DatabaseTree.setCellRenderer(cell);
         DatabaseTree.setRootVisible(false);
         DatabaseTree.setShowsRootHandles(true);
+        
 
         MouseAdapter ma = new MouseAdapter() {
+            private void addDefSelect(String table){
+                SqlTab tab = tabs.createTab(table + ".sql");
+                String query =
+                        "SELECT\n"+
+                        "\t*\n"+
+                        "FROM\n" +
+                        "\t" + table;
+                tab.getEditPane().setText(query);
+                ((MysqlJavaCatView)application.getMainView()).RunButtonActionPerformed(null);
+            }
             private void myPopupEvent(MouseEvent e) {
                     int x = e.getX();
                     int y = e.getY();
@@ -140,15 +155,7 @@ public class MysqlJavaCatView extends FrameView {
                         menu_item.setIcon(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/table.png")));
                         menu_item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
-                                String table = node.getUserObject().toString();
-                                SqlTab tab = tabs.createTab(table + ".sql");
-                                String query =
-                                        "SELECT\n"+
-                                        "\t*\n"+
-                                        "FROM\n" +
-                                        "\t" + table;
-                                tab.getEditPane().setText(query);
-                                ((MysqlJavaCatView)application.getMainView()).RunButtonActionPerformed(null);
+                                addDefSelect(node.getUserObject().toString());
                             }
                         });
 
@@ -165,16 +172,28 @@ public class MysqlJavaCatView extends FrameView {
             public void mouseReleased(MouseEvent e) {
                     if (e.isPopupTrigger()) myPopupEvent(e);
             }
+            @Override
+            public void mouseClicked(MouseEvent e){
+                if(e.getClickCount() == 2){
+                    int x = e.getX();
+                    int y = e.getY();
+                    JTree tree = (JTree)e.getSource();
+                    TreePath path = tree.getPathForLocation(x, y);
+                    if (path == null)
+                            return;
+                    tree.setSelectionPath(path);
+                    final DefaultMutableTreeNode node =(DefaultMutableTreeNode)path.getLastPathComponent();
+                    if(node.getUserObject().getClass() == TableObj.class)
+                        addDefSelect(node.getUserObject().toString());
+                }
+            }
+
 
         };
         DatabaseTree.addMouseListener(ma);
         databaseCombo.setModel(new DefaultComboBoxModel());
         resultTable.setModel(new javax.swing.table.DefaultTableModel());
-        treePane.setEnabled(false);
-
-        if(application.getProperties().getProperty("connectOnStartUp","0").equals("1")){
-            connectButtonActionPerformed(null);
-        }
+        treePane.setEnabled(false);        
 
         // status bar initialization - message timeout, idle icon and busy animation, etc
         ResourceMap resourceMap = getResourceMap();
@@ -200,7 +219,7 @@ public class MysqlJavaCatView extends FrameView {
         progressBar.setVisible(false);
 
         // connecting action tasks to status bar via TaskMonitor
-        TaskMonitor taskMonitor = new TaskMonitor(getApplication().getContext());
+        TaskMonitor taskMonitor = new TaskMonitor(application.getContext());
         taskMonitor.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 String propertyName = evt.getPropertyName();
@@ -217,6 +236,7 @@ public class MysqlJavaCatView extends FrameView {
                     statusAnimationLabel.setIcon(idleIcon);
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
+                    statusMessageLabel.setText(null);
                 } else if ("message".equals(propertyName)) {
                     String text = (String)(evt.getNewValue());
                     statusMessageLabel.setText((text == null) ? "" : text);
@@ -225,7 +245,7 @@ public class MysqlJavaCatView extends FrameView {
                     int value = (Integer)(evt.getNewValue());
                     progressBar.setVisible(true);
                     progressBar.setIndeterminate(false);
-                    progressBar.setValue(value);
+                    progressBar.setValue(value);                    
                 }
             }
         });
@@ -256,6 +276,7 @@ public class MysqlJavaCatView extends FrameView {
         disconnectButton = new javax.swing.JButton();
         databaseCombo = new javax.swing.JComboBox();
         RunButton = new javax.swing.JButton();
+        cancelButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
         horisontalSplit = new javax.swing.JSplitPane();
         jTabbedPane1 = new javax.swing.JTabbedPane();
@@ -342,6 +363,21 @@ public class MysqlJavaCatView extends FrameView {
             }
         });
         jToolBar3.add(RunButton);
+
+        cancelButton.setIcon(resourceMap.getIcon("cancelButton.icon")); // NOI18N
+        cancelButton.setText(resourceMap.getString("cancelButton.text")); // NOI18N
+        cancelButton.setToolTipText(resourceMap.getString("cancelButton.toolTipText")); // NOI18N
+        cancelButton.setEnabled(false);
+        cancelButton.setFocusable(false);
+        cancelButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        cancelButton.setName("cancelButton"); // NOI18N
+        cancelButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelButtonActionPerformed(evt);
+            }
+        });
+        jToolBar3.add(cancelButton);
 
         jSplitPane1.setBorder(null);
         jSplitPane1.setName("jSplitPane1"); // NOI18N
@@ -554,54 +590,109 @@ public class MysqlJavaCatView extends FrameView {
     }// </editor-fold>//GEN-END:initComponents
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
-        application.connectToDb();
-        if(application.getConnection() != null){
-            updateTree();
+        try {
             connectButton.setEnabled(false);
-            disconnectButton.setEnabled(true);
-            databaseCombo.setEnabled(true);
-            RunButton.setEnabled(true);
+            application.connectToDb();
+            if(application.getConnection() != null){
+                updateTree();
+            }
+        } catch (SQLException ex) {
+            application.showError(ex.getMessage());
         }
     }//GEN-LAST:event_connectButtonActionPerformed
 
     private void RunButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RunButtonActionPerformed
-        if(application.getConnection() == null || tabs.getCurrEditorPane().getText().isEmpty()){
-            return;
-        }
-        javax.swing.table.DefaultTableModel defaultColumnModel = new javax.swing.table.DefaultTableModel();
-        Long time = System.currentTimeMillis();
-        Object res = application.executeCustom(tabs.getCurrEditorPane().getText());
-        if(res == null)
-            return;
-        Long milisec = System.currentTimeMillis() - time;
-        tabs.getSelectedtab().setRequestTime(milisec);
-        Float sec = milisec.floatValue() / 1000;
-        ArrayList<ArrayList<Object>> result = new ArrayList<ArrayList<Object>>();
-        if(res.getClass() == com.mysql.jdbc.JDBC4ResultSet.class){
-            for(String col : application.getCols((ResultSet)res)){
-                defaultColumnModel.addColumn(col);
+        queryTask = new Task(application) {
+            private Statement stmt;
+            private void openGui(){
+                RunButton.setEnabled(true);
+                DatabaseTree.setEnabled(true);
+                cancelButton.setEnabled(false);
+                databaseCombo.setEnabled(true);
+                disconnectButton.setEnabled(true);
             }
-            result = application.getRows((ResultSet)res);
-        }else{
-            defaultColumnModel.addColumn("Rows Affected");
-            ArrayList<Object> single_cell = new ArrayList<Object>();
-            single_cell.add(res);
-            result.add(single_cell);
-        }
-        tabs.getSelectedtab().setRowCount(result.size());
-        requestTime.setText("Request time: " + sec.toString() + " sec");
-        rowCount.setText("Row count: " + new Integer(result.size()).toString());
-        for(ArrayList<Object> row : result){
-            defaultColumnModel.addRow(row.toArray());
+            private void closeGui(){
+                RunButton.setEnabled(false);
+                DatabaseTree.setEnabled(false);
+                cancelButton.setEnabled(true);
+                databaseCombo.setEnabled(false);
+                disconnectButton.setEnabled(false);
+            }
+            @Override
+            protected Object doInBackground() throws Exception {
+                closeGui();
+                if(application.getConnection() == null || tabs.getCurrEditorPane().getText().isEmpty()){
+                    return null;
+                }
+                javax.swing.table.DefaultTableModel defaultColumnModel = new javax.swing.table.DefaultTableModel();
+                Long time = System.currentTimeMillis();
+                Object res = null;
+                stmt = application.getConnection().createStatement();
+                try{                    
+                    if(stmt.execute(tabs.getCurrEditorPane().getText())){
+                        res = stmt.getResultSet();
+                    }else{
+                        res = stmt.getUpdateCount();
+                    }
+                }catch(SQLException e){                    
+                    res = null;
+                    resultTable.setModel(defaultColumnModel);
+                    if(e.getErrorCode() != 1317){
+                        application.showError(e.getMessage());
+                    }
+                    openGui();                    
+                }
+                if(res == null)
+                    return null;
 
-        }
-        resultTable.setModel(defaultColumnModel);
-        TableColumnModel columns = resultTable.getColumnModel();
-        for (int i = columns.getColumnCount() - 1; i >= 0; --i){
-            columns.getColumn(i).setPreferredWidth(200);
-        }
-        tabs.getSelectedtab().setResultColModel(defaultColumnModel);
-        resultTable.getTableHeader().setReorderingAllowed(false);
+
+                Long milisec = System.currentTimeMillis() - time;
+                tabs.getSelectedtab().setRequestTime(milisec);
+                Float sec = milisec.floatValue() / 1000;
+                ArrayList<ArrayList<Object>> result = new ArrayList<ArrayList<Object>>();
+                if(res.getClass() == com.mysql.jdbc.JDBC4ResultSet.class){
+                    for(String col : application.getCols((ResultSet)res)){
+                        defaultColumnModel.addColumn(col);
+                    }
+                    result = application.getRows((ResultSet)res);
+                }else{
+                    defaultColumnModel.addColumn("Rows Affected");
+                    ArrayList<Object> single_cell = new ArrayList<Object>();
+                    single_cell.add(res);
+                    result.add(single_cell);
+                }
+                tabs.getSelectedtab().setRowCount(result.size());
+                requestTime.setText("Request time: " + sec.toString() + " sec");
+                rowCount.setText("Row count: " + new Integer(result.size()).toString());
+                for(ArrayList<Object> row : result){
+                    defaultColumnModel.addRow(row.toArray());
+                }
+                resultTable.setModel(defaultColumnModel);
+                TableColumnModel columns = resultTable.getColumnModel();
+                for (int i = columns.getColumnCount() - 1; i >= 0; --i){
+                    columns.getColumn(i).setPreferredWidth(200);
+                }
+                tabs.getSelectedtab().setResultColModel(defaultColumnModel);
+                resultTable.getTableHeader().setReorderingAllowed(false);
+                openGui();
+                return null;
+            }
+            @Override
+            public void cancelled() {
+                openGui();
+                try {
+                    stmt.cancel();
+                    stmt.close();
+                    stmt = null;
+                    Runtime.getRuntime().gc();
+                } catch (SQLException ex) {
+                    Logger.getLogger(MysqlJavaCatView.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        };
+
+        application.getContext().getTaskService().execute(queryTask);
+        application.getContext().getTaskMonitor().setForegroundTask(queryTask);
     }//GEN-LAST:event_RunButtonActionPerformed
 
     private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
@@ -646,6 +737,10 @@ public class MysqlJavaCatView extends FrameView {
         DatabaseTreeValueChanged(event);
     }//GEN-LAST:event_DatabaseTreeTreeExpanded
 
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        queryTask.cancel(true);
+    }//GEN-LAST:event_cancelButtonActionPerformed
+
     public void proxyRunConnect(){
         connectButtonActionPerformed(null);
     }
@@ -655,27 +750,17 @@ public class MysqlJavaCatView extends FrameView {
             Task task = new Task(application) {
                 @Override
                 protected Object doInBackground() throws Exception {
-                    progressBar.setVisible(true);
                     RunButton.setEnabled(false);
                     databaseCombo.setEnabled(false);
                     DatabaseTree.setEnabled(false);
-                    statusAnimationLabel.setIcon(busyIcons[0]);
-                    progressBar.setIndeterminate(false);
-                    progressBar.setMinimum(0);
                     ArrayList<ArrayList<Object>> fields_list = application.getRows(application.executeSql("SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + selected_db + "'"));
-                    progressBar.setMaximum(fields_list.size());                                    
                     for( ArrayList<Object> field : fields_list){                        
-                        statusMessageLabel.setText("Table scan:"+field.get(0).toString());
-                        progressBar.setValue(progressBar.getValue() + 1);
+                        setMessage("Table scan:"+field.get(0).toString());
                         TableObj table = selected_db.getTable(field.get(0).toString());
                         DefaultMutableTreeNode field_node = new DefaultMutableTreeNode();
                         field_node.setUserObject(new FieldObj(field.get(1).toString(), table, field_node));
                         table.getNode().add(field_node);
                     }
-                    progressBar.setVisible(false);
-                    statusAnimationLabel.setIcon(idleIcon);
-                    statusMessageLabel.setText(null);
-
                     RunButton.setEnabled(true);
                     databaseCombo.setEnabled(true);
                     DatabaseTree.setEnabled(true);
@@ -684,7 +769,8 @@ public class MysqlJavaCatView extends FrameView {
                     return null;
                 }
             };
-            task.execute();
+            application.getContext().getTaskService().execute(task);
+            application.getContext().getTaskMonitor().setForegroundTask(task);
         }
     }
 
@@ -692,16 +778,11 @@ public class MysqlJavaCatView extends FrameView {
         Task task = new Task(application) {
             @Override
             protected Object doInBackground() throws Exception {
-                progressBar.setVisible(true);
-                progressBar.setIndeterminate(false);
-                progressBar.setMinimum(0);
                 DatabaseTree.setModel(null);
                 DatabaseTree.setEnabled(false);
-                statusAnimationLabel.setIcon(busyIcons[0]);
                 javax.swing.tree.DefaultMutableTreeNode rootNode = new javax.swing.tree.DefaultMutableTreeNode("Databases");
                 DefaultComboBoxModel combo_model = new DefaultComboBoxModel();
                 ArrayList<ArrayList<Object>> all_databases  =  application.getRows(application.executeSql("SHOW DATABASES"));
-                progressBar.setMaximum(all_databases.size());
                 for(ArrayList<Object> row :  all_databases){
                     DefaultMutableTreeNode databaseNode = new DefaultMutableTreeNode();
                     DatabaseObj database = new DatabaseObj(row.get(0).toString(),databaseNode);
@@ -709,9 +790,8 @@ public class MysqlJavaCatView extends FrameView {
                     combo_model.addElement(database);               
                     rootNode.add(databaseNode);
                     application.executeSql("USE " + database);
-                    selected_db = database;
-                    statusMessageLabel.setText("Database scan:"+database);
-                    progressBar.setValue(progressBar.getValue() + 1);
+                    selected_db = database;                    
+                    setMessage("Database scan:" + database);
                     ArrayList<ArrayList<Object>> tables_local = application.getRows(application.executeSql("SHOW TABLES"));
                     for(ArrayList<Object> row_datatabasedb_tables : tables_local){
                         DefaultMutableTreeNode table_node = new DefaultMutableTreeNode();
@@ -721,22 +801,25 @@ public class MysqlJavaCatView extends FrameView {
                     }
                     databases.put(database.toString(), database);
                 }
-                progressBar.setVisible(false);
-                statusMessageLabel.setText(null);
-                statusAnimationLabel.setIcon(idleIcon);
                 combo_model.setSelectedItem(selected_db);
                 DatabaseTree.setModel(new DefaultTreeModel(rootNode));
-                databaseCombo.setModel(combo_model);
-                upadateFiedlsCache(false);
+                databaseCombo.setModel(combo_model);                
                 DatabaseTree.setEnabled(true);
+                upadateFiedlsCache(false);
+                connectButton.setEnabled(false);
+                disconnectButton.setEnabled(true);
+                databaseCombo.setEnabled(true);
+                RunButton.setEnabled(true);
                 return null;
             }
-        };
-        task.execute();
+        };       
+        application.getContext().getTaskService().execute(task);
+        application.getContext().getTaskMonitor().setForegroundTask(task);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTree DatabaseTree;
     private javax.swing.JButton RunButton;
+    private javax.swing.JButton cancelButton;
     private javax.swing.JButton connectButton;
     private javax.swing.JComboBox databaseCombo;
     private javax.swing.JButton disconnectButton;

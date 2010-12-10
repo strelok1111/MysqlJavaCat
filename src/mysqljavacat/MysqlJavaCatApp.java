@@ -102,22 +102,23 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             e.printStackTrace();
         }
     }
-    public void connectToDb(){
-        try{
+    public void connectToDb() throws SQLException{
+        try {
             Class.forName("com.mysql.jdbc.Driver");
-
-            String dsn = "jdbc:mysql://" + prop.getProperty("host") + ":3306";
-            if(prop.getProperty("useSSH","0").equals("1")){
-                dsn = dsn
-                + "?socketFactory=SSHSocketFactory"
-                + "&SSHHost=" + prop.getProperty("SSHhost")
-                + "&SSHUser=" + prop.getProperty("SSHuser")
-                + "&SSHPassword=" + prop.getProperty("SSHpass");
-            }
-            dbConnection = DriverManager.getConnection(dsn,prop.getProperty("user"), prop.getProperty("password"));
-        }catch(Exception e){
-            showError(e.toString());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        String dsn = "jdbc:mysql://" + prop.getProperty("host") + ":3306";
+        if(prop.getProperty("useSSH","0").equals("1")){
+            dsn = dsn
+            + "?socketFactory=SSHSocketFactory"
+            + "&SSHHost=" + prop.getProperty("SSHhost")
+            + "&SSHUser=" + prop.getProperty("SSHuser")
+            + "&SSHPassword=" + prop.getProperty("SSHpass");
+        }
+        dbConnection = DriverManager.getConnection(dsn,prop.getProperty("user"), prop.getProperty("password"));
+        
     }
 
     public Object executeCustom(String sql){
@@ -215,18 +216,21 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
      */
     @Override protected void startup() {
         loadProp();
-        show(new MysqlJavaCatView(this));
+        MysqlJavaCatView view = new MysqlJavaCatView(this);
+        show(view);
+        if(getProperties().getProperty("connectOnStartUp","0").equals("1")){
+            view.proxyRunConnect();
+        }
     }
      @Override protected void configureWindow(java.awt.Window root) {
         root.addWindowListener(new WindowAdapter() {
 
         @Override
         public void windowClosing(WindowEvent e) {
-            for(SqlTab tab : ((MysqlJavaCatView)getMainView()).getTabsMain().getSqlTabs()){
-                File f = new File("current",tab.getFilename());
-                saveToFile(tab.getEditPane().getText(), f);
-            }
-
+                for(SqlTab tab : ((MysqlJavaCatView)getMainView()).getTabsMain().getSqlTabs()){
+                    File f = new File("current",tab.getFilename());
+                    saveToFile(tab.getEditPane().getText(), f);
+                }
         }
 
     });

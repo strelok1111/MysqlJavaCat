@@ -11,7 +11,10 @@
 
 package mysqljavacat.dialogs;
 
+import java.sql.SQLException;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mysqljavacat.MysqlJavaCatApp;
 import mysqljavacat.MysqlJavaCatView;
 
@@ -69,6 +72,7 @@ public class ConfigDialog extends javax.swing.JDialog {
         jLabel6 = new javax.swing.JLabel();
         sshPass = new javax.swing.JPasswordField();
         connectOnStartup = new javax.swing.JCheckBox();
+        testConnection = new javax.swing.JButton();
 
         setName("Form"); // NOI18N
 
@@ -123,7 +127,7 @@ public class ConfigDialog extends javax.swing.JDialog {
                     .addComponent(passField)
                     .addComponent(userField)
                     .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(54, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -188,9 +192,9 @@ public class ConfigDialog extends javax.swing.JDialog {
                             .addComponent(jLabel4))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(sshUser, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
-                            .addComponent(sshPass, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
-                            .addComponent(sshHost, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE))))
+                            .addComponent(sshUser, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
+                            .addComponent(sshPass, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
+                            .addComponent(sshHost, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -218,21 +222,31 @@ public class ConfigDialog extends javax.swing.JDialog {
         connectOnStartup.setText(resourceMap.getString("connectOnStartup.text")); // NOI18N
         connectOnStartup.setName("connectOnStartup"); // NOI18N
 
+        testConnection.setText(resourceMap.getString("testConnection.text")); // NOI18N
+        testConnection.setName("testConnection"); // NOI18N
+        testConnection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                testConnectionActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 293, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(82, 82, 82)
-                .addComponent(okButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cancelButton)
-                .addContainerGap(86, Short.MAX_VALUE))
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(connectOnStartup)
-                .addContainerGap(148, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(okButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cancelButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(testConnection))
+                    .addComponent(connectOnStartup))
+                .addContainerGap(39, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -243,7 +257,8 @@ public class ConfigDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okButton)
-                    .addComponent(cancelButton))
+                    .addComponent(cancelButton)
+                    .addComponent(testConnection))
                 .addContainerGap())
         );
 
@@ -253,8 +268,7 @@ public class ConfigDialog extends javax.swing.JDialog {
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         setVisible(false);
     }//GEN-LAST:event_cancelButtonActionPerformed
-
-    private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
+    private void setProps(){
         Properties prop = MysqlJavaCatApp.getApplication().getProperties();
         prop.setProperty("host", hostField.getText());
         prop.setProperty("user", userField.getText());
@@ -271,8 +285,11 @@ public class ConfigDialog extends javax.swing.JDialog {
         else
             prop.setProperty("connectOnStartUp", "0");
         MysqlJavaCatApp.getApplication().saveProp();
-        ((MysqlJavaCatView) MysqlJavaCatApp.getApplication().getMainView()).proxyRunConnect();
+    }
+    private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
+        setProps();
         setVisible(false);
+        ((MysqlJavaCatView) MysqlJavaCatApp.getApplication().getMainView()).proxyRunConnect();        
     }//GEN-LAST:event_okButtonActionPerformed
 
     private void useSSHTunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_useSSHTunMouseClicked
@@ -280,6 +297,16 @@ public class ConfigDialog extends javax.swing.JDialog {
         sshUser.setEnabled(useSSHTun.isSelected());
         sshPass.setEnabled(useSSHTun.isSelected());
     }//GEN-LAST:event_useSSHTunMouseClicked
+
+    private void testConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testConnectionActionPerformed
+        try {
+            setProps();
+            MysqlJavaCatApp.getApplication().connectToDb();
+            MysqlJavaCatApp.getApplication().showError("Connection OK!");
+        } catch (SQLException ex) {
+            MysqlJavaCatApp.getApplication().showError(ex.getMessage());
+        }
+    }//GEN-LAST:event_testConnectionActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
@@ -299,6 +326,7 @@ public class ConfigDialog extends javax.swing.JDialog {
     private javax.swing.JTextField sshHost;
     private javax.swing.JPasswordField sshPass;
     private javax.swing.JTextField sshUser;
+    private javax.swing.JButton testConnection;
     private javax.swing.JCheckBox useSSHTun;
     private javax.swing.JTextField userField;
     // End of variables declaration//GEN-END:variables
