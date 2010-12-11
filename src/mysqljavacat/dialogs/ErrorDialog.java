@@ -9,7 +9,7 @@ public class ErrorDialog extends javax.swing.JDialog {
     /** Creates new form ErrorDialog */
     public ErrorDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        initComponents();
+        initComponents();        
     }
     public javax.swing.JTextPane getLabel(){
         return jTextPane1;
@@ -28,11 +28,14 @@ public class ErrorDialog extends javax.swing.JDialog {
         jTextPane1 = new javax.swing.JTextPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(mysqljavacat.MysqlJavaCatApp.class).getContext().getResourceMap(ErrorDialog.class);
+        setTitle(resourceMap.getString("Form.title")); // NOI18N
         setName("Form"); // NOI18N
+        setResizable(false);
 
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(mysqljavacat.MysqlJavaCatApp.class).getContext().getResourceMap(ErrorDialog.class);
+        jTextPane1.setEditable(false);
         jTextPane1.setFont(resourceMap.getFont("jTextPane1.font")); // NOI18N
         jTextPane1.setMaximumSize(new java.awt.Dimension(500, 500));
         jTextPane1.setMinimumSize(new java.awt.Dimension(500, 500));
@@ -43,11 +46,11 @@ public class ErrorDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 797, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
         );
 
         pack();

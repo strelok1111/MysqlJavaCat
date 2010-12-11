@@ -19,7 +19,7 @@ import javax.swing.table.TableColumnModel;
  * @author strelok
  */
 public class SqlTabbedPane extends JTabbedPane {
-    public SqlTabbedPane() {        
+    public SqlTabbedPane() {
         if ((new File("current")).exists()) {
             File dir = new File("current");
             File[] children = dir.listFiles(new FilenameFilter() {

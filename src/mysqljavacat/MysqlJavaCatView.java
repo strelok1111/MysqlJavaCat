@@ -102,6 +102,8 @@ public class MysqlJavaCatView extends FrameView {
                         tabs.getSelectedtab().close();
                     }else if(e.getKeyCode() == 120){
                         RunButtonActionPerformed(null);
+                    }else if((e.getKeyCode() == 27 || e.getKeyCode() == 10) && application.getErrorDialog() != null && application.getErrorDialog().isVisible()){
+                        application.getErrorDialog().setVisible(false);
                     }else if(e.getKeyCode() == 27){
                         for(SqlTab tab : tabs.getSqlTabs()){
                             tab.getComboDialog().hideVithPrepared();

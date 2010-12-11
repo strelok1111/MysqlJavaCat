@@ -39,6 +39,9 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     private Connection dbConnection;
     private ErrorDialog errordialog;
     private Properties prop = new Properties();
+    public ErrorDialog getErrorDialog(){
+        return errordialog;
+    }
     public void saveToFile(String str,File file){
         PrintWriter fw = null;
         try {
