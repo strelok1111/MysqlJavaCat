@@ -1,11 +1,5 @@
-/*
- * MysqlJavaCatView.java
- */
-
 package mysqljavacat;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mysqljavacat.dialogs.MysqlJavaCatAboutBox;
 import mysqljavacat.dialogs.ConfigDialog;
 import mysqljavacat.databaseobjects.DatabaseObj;
@@ -30,7 +24,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
@@ -50,7 +43,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import jsyntaxpane.DefaultSyntaxKit;
 import org.jdesktop.application.Task;
-import org.jdesktop.application.TaskEvent;
 
 /**
  * The application's main frame.
