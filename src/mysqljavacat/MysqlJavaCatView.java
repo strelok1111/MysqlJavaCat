@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
@@ -41,6 +42,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JTree;
+import javax.swing.MenuElement;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -48,6 +50,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import jsyntaxpane.DefaultSyntaxKit;
 import org.jdesktop.application.Task;
+import org.jdesktop.application.TaskEvent;
 
 /**
  * The application's main frame.
@@ -607,12 +610,17 @@ public class MysqlJavaCatView extends FrameView {
 
         queryTask = new Task(application) {
             private Statement stmt;
+            private ResultSet r1;
             private void openGui(){
                 RunButton.setEnabled(true);
                 DatabaseTree.setEnabled(true);
                 cancelButton.setEnabled(false);
                 databaseCombo.setEnabled(true);
                 disconnectButton.setEnabled(true);
+                for(MenuElement m : menuBar.getSubElements()){
+                    m.getComponent().setEnabled(true);
+                }
+
             }
             private void closeGui(){
                 RunButton.setEnabled(false);
@@ -620,106 +628,99 @@ public class MysqlJavaCatView extends FrameView {
                 cancelButton.setEnabled(true);
                 databaseCombo.setEnabled(false);
                 disconnectButton.setEnabled(false);
+                menuBar.setEnabled(false);
+                for(MenuElement m : menuBar.getSubElements()){
+                    m.getComponent().setEnabled(false);
+                }
             }
             @Override
             protected Object doInBackground() throws Exception {
                 closeGui();
+                SqlTab tab =  tabs.getSelectedtab();
                 Object res = null;
-                if(application.getConnection() == null || tabs.getCurrEditorPane().getText().isEmpty()){
+                if(application.getConnection() == null || tab.getEditPane().getText().isEmpty()){
                     return res;
                 }                
                 Long time = System.currentTimeMillis();
-                
                 stmt = application.getConnection().createStatement();
                 stmt.setFetchSize(Integer.MIN_VALUE);
                 
-                try{                    
-                    if(stmt.execute(tabs.getCurrEditorPane().getText())){
+                try{
+                    setMessage("Executing Query");
+                    if(stmt.execute(tab.getEditPane().getText())){
                         res = stmt.getResultSet();
                     }else{
                         res = stmt.getUpdateCount();
-                    }
-                }catch(SQLException e){
-                    stmt.close();
-                    openGui();
+                    }                    
+                }catch(SQLException e){                    
                     resultTable.setModel(new javax.swing.table.DefaultTableModel());
                     if(e.getErrorCode() != 1317){
                         application.showError(e.getMessage());
-                    }                    
+                    }
+                    return null;
                 }
                 Long milisec = System.currentTimeMillis() - time;
-                tabs.getSelectedtab().setRequestTime(milisec);
-                Float sec = milisec.floatValue() / 1000;
-                requestTime.setText("Request time: " + sec.toString() + " sec");                
-                return res;
+                tab.setRequestTime(milisec);
+                Float sec = milisec.floatValue() / 1000;                
+                javax.swing.table.DefaultTableModel defaultColumnModel = new javax.swing.table.DefaultTableModel();
+                int size = 0;
+                if(res.getClass() == com.mysql.jdbc.JDBC4ResultSet.class){
+                    setMessage("Fetching Result");
+                    r1 = (ResultSet)res;
+                    int col_count = r1.getMetaData().getColumnCount();
+                    for(int i = 1;i <= col_count;i = i + 1){
+                        defaultColumnModel.addColumn(r1.getMetaData().getColumnLabel(i));
+                    }
+                    while(r1.next()){                        
+                        Object [] arr = new Object[col_count];
+                        for(int i = 1; i <= col_count ; i = i + 1){
+                            arr[i-1] = r1.getObject(i);
+                        }
+                        defaultColumnModel.addRow(arr);
+                        size = size + 1;
+                    }                    
+                }else{
+                    defaultColumnModel.addColumn("Rows Affected");
+                    ArrayList<Object> single_cell = new ArrayList<Object>();
+                    single_cell.add(res);
+                    size = 1;
+                    defaultColumnModel.addRow(single_cell.toArray());
+                }
+                tab.setRowCount(size);
+                
+                if(tabs.getSelectedtab() == tab){
+                    resultTable.setModel(defaultColumnModel);
+                    rowCount.setText("Row count: " + new Integer(size).toString());
+                    requestTime.setText("Request time: " + sec.toString() + " sec");
+                    TableColumnModel columns = resultTable.getColumnModel();
+                    for (int i = columns.getColumnCount() - 1; i >= 0; --i){
+                        columns.getColumn(i).setPreferredWidth(200);
+                    }
+                }
+                tab.setResultColModel(defaultColumnModel);
+                resultTable.getTableHeader().setReorderingAllowed(false);
+                return null;
             }
             @Override
             public void cancelled() {
                 try {
+                    if(r1 != null)
+                        r1.close();
                     stmt.cancel();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            @Override
+            public void finished() {
+                try {
+                    stmt.clearBatch();
                     stmt.close();
                     openGui();
                 } catch (SQLException ex) {
-                    Logger.getLogger(MysqlJavaCatView.class.getName()).log(Level.SEVERE, null, ex);
+                    ex.printStackTrace();
                 }
             }
-     
-            @Override
-            protected void succeeded(Object res_in){
-                final Object res = res_in;
-                if(res == null)
-                    return;
-                Task fetch_task = new Task(application) {
-                    @Override
-                    protected Object doInBackground() throws Exception {
-                        javax.swing.table.DefaultTableModel defaultColumnModel = new javax.swing.table.DefaultTableModel();
-                        int size = 0;
-                        if(res.getClass() == com.mysql.jdbc.JDBC4ResultSet.class){
-                            ResultSet r1 = (ResultSet)res;                            
-                            int col_count = r1.getMetaData().getColumnCount();
-                            for(int i = 1;i <= col_count;i = i + 1){
-                                defaultColumnModel.addColumn(r1.getMetaData().getColumnLabel(i));
-                            }
-                            while(r1.next()){
-                                size = size + 1;
-                                Object [] arr = new Object[col_count];
-                                for(int i = 1; i <= col_count ; i = i + 1){
-                                    arr[i-1] = r1.getObject(i);
-                                }
-                                defaultColumnModel.addRow(arr);
-                            }
-                        }else{
-                            defaultColumnModel.addColumn("Rows Affected");
-                            ArrayList<Object> single_cell = new ArrayList<Object>();
-                            single_cell.add(res);
-                            size = 1;
-                            defaultColumnModel.addRow(single_cell.toArray());
-                        }
-                        tabs.getSelectedtab().setRowCount(size);
-                        rowCount.setText("Row count: " + new Integer(size).toString());
-                        resultTable.setModel(defaultColumnModel);
-                        TableColumnModel columns = resultTable.getColumnModel();
-                        for (int i = columns.getColumnCount() - 1; i >= 0; --i){
-                            columns.getColumn(i).setPreferredWidth(200);
-                        }
-                        tabs.getSelectedtab().setResultColModel(defaultColumnModel);
-                        resultTable.getTableHeader().setReorderingAllowed(false);
-                        return null;
-                    }
-                    @Override
-                    protected void finished() {
-                        try {
-                            stmt.close();
-                            openGui();
-                        } catch (SQLException ex) {
-                            Logger.getLogger(MysqlJavaCatView.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                };
-                application.getContext().getTaskService().execute(fetch_task);
-                application.getContext().getTaskMonitor().setForegroundTask(fetch_task);
-            }
-
         };
 
         application.getContext().getTaskService().execute(queryTask);
@@ -777,33 +778,25 @@ public class MysqlJavaCatView extends FrameView {
     }
 
     private void upadateFiedlsCache(final boolean force){
-        if(force || !selected_db.isSet()){
-            Task task = new Task(application) {
-                @Override
-                protected Object doInBackground() throws Exception {
-                    RunButton.setEnabled(false);
-                    databaseCombo.setEnabled(false);
-                    disconnectButton.setEnabled(false);
-                    DatabaseTree.setEnabled(false);
-                    ArrayList<ArrayList<Object>> fields_list = application.getRows(application.executeSql("SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + selected_db + "'"));
-                    for( ArrayList<Object> field : fields_list){                        
-                        setMessage("Table scan:"+field.get(0).toString());
-                        TableObj table = selected_db.getTable(field.get(0).toString());
-                        DefaultMutableTreeNode field_node = new DefaultMutableTreeNode();
-                        field_node.setUserObject(new FieldObj(field.get(1).toString(), table, field_node));
-                        table.getNode().add(field_node);
-                    }
-                    RunButton.setEnabled(true);
-                    databaseCombo.setEnabled(true);
-                    DatabaseTree.setEnabled(true);
-                    disconnectButton.setEnabled(true);
-                    selected_db.setIsSet(true);
-                    return null;
-                }
-            };
-            application.getContext().getTaskService().execute(task);
-            application.getContext().getTaskMonitor().setForegroundTask(task);
+        if(force || !selected_db.isSet()){           
+            RunButton.setEnabled(false);
+            databaseCombo.setEnabled(false);
+            disconnectButton.setEnabled(false);
+            DatabaseTree.setEnabled(false);
+            ArrayList<ArrayList<Object>> fields_list = application.getRows(application.executeSql("SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + selected_db + "'"));
+            for( ArrayList<Object> field : fields_list){
+                TableObj table = selected_db.getTable(field.get(0).toString());
+                DefaultMutableTreeNode field_node = new DefaultMutableTreeNode();
+                field_node.setUserObject(new FieldObj(field.get(1).toString(), table, field_node));
+                table.getNode().add(field_node);
+            }
+            RunButton.setEnabled(true);
+            databaseCombo.setEnabled(true);
+            DatabaseTree.setEnabled(true);
+            disconnectButton.setEnabled(true);
+            selected_db.setIsSet(true);
         }
+        
     }
 
     private void updateTree(){
