@@ -5,8 +5,14 @@
 
 package mysqljavacat;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import mysqljavacat.dialogs.ComboDialog;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.LayoutManager;
+import java.awt.LayoutManager2;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -27,6 +33,8 @@ import javax.swing.JScrollPane;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.table.DefaultTableModel;
+import org.w3c.dom.ls.LSException;
+import sun.swing.DefaultLayoutStyle;
 
 /**
  *
@@ -199,6 +207,13 @@ public class SqlTab extends JScrollPane{
         tab_header = new JPanel();
         tab_header.setOpaque(false);
         tab_header.add(tab_label);
+        tab_header.setBorder(null);
+        FlowLayout la = new FlowLayout();
+        la.setHgap(3);
+        la.setVgap(0);
+        la.setAlignOnBaseline(true);
+        la.setAlignment(FlowLayout.LEFT);
+        tab_header.setLayout(la);
         tab_header.add(tabCloseButton);
     }
     public void close(){

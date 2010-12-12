@@ -55,16 +55,28 @@ public class ComboDialog extends javax.swing.JDialog {
         return jList1;
     }
     private void FilterAddList(ArrayList<Object> list,ArrayList<Object> input,String filter){
+        FilterAddList(list,input,filter,true);
+    }
+    private void FilterAddList(ArrayList<Object> list,ArrayList<Object> input,String filter,boolean in_the_end){
         Collections.sort(input,new StringComparator());
         if(filter == null){
-            for(Object s : input)
-                list.add(s);
+            if(in_the_end){
+                for(Object s : input)
+                    list.add(s);
+            }else{
+                for(int i = input.size() - 1; i >= 0;i = i - 1)
+                    list.add(0,input.get(i));
+            }
         }else{
             Pattern p = Pattern.compile("^" + Pattern.quote(filter),Pattern.CASE_INSENSITIVE);
-            for(Object s : input){
-                if(p.matcher(s.toString()).find()){
-                    list.add(s);
-                }
+            if(in_the_end){
+                for(Object s : input)
+                    if(p.matcher(s.toString()).find())
+                          list.add(s);
+            }else{
+                for(int i = input.size() - 1; i >= 0;i = i-1)
+                    if(p.matcher(input.get(i).toString()).find())
+                          list.add(0,input.get(i));
             }
         }
     }
@@ -85,26 +97,27 @@ public class ComboDialog extends javax.swing.JDialog {
         ArrayList<Object> query_tables = getQueryTables(cur_db);
         if(input.length() == 0){
             if(query_tables.size() == 1){
-                FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),null);
-                //out.add(null);
-            }
-            if(!query_tables.isEmpty()){
-                FilterAddList(out,query_tables,null);
-                //out.add(null);
+                FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),null);                
             }
             FilterAddList(out,new ArrayList<Object>(cur_db.getTables()),null);
+            if(!query_tables.isEmpty()){
+                for(Object o : query_tables)
+                    out.remove(o);
+                FilterAddList(out,query_tables,null,false);
+            }            
             FilterAddList(out,new ArrayList<Object>(FuncObj.getFucList()),null);
             FilterAddList(out,new ArrayList<Object>(db_map.values()),null);
         }else if(parts.length == 1 && !input.endsWith(".")){
             if(query_tables.size() == 1){
                 FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),parts[0]);
-                //out.add(null);
-            }
-            if (!query_tables.isEmpty()) {
-                FilterAddList(out,query_tables,parts[0]);
-                //out.add(null);
+
             }
             FilterAddList(out,new ArrayList<Object>(cur_db.getTables()),parts[0]);
+            if (!query_tables.isEmpty()) {
+                for(Object o : query_tables)
+                    out.remove(o);
+                FilterAddList(out,query_tables,parts[0],false);
+            }            
             FilterAddList(out,new ArrayList<Object>(FuncObj.getFucList()),parts[0]);
             FilterAddList(out,new ArrayList<Object>(db_map.values()),parts[0]);
         }else if(parts.length == 1 && input.endsWith(".")){            

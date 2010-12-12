@@ -10,8 +10,8 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="jToolBar3" alignment="0" pref="569" max="32767" attributes="0"/>
-              <Component id="jSplitPane1" alignment="0" pref="569" max="32767" attributes="0"/>
+              <Component id="jToolBar3" alignment="0" pref="711" max="32767" attributes="0"/>
+              <Component id="jSplitPane1" alignment="0" pref="711" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -19,7 +19,7 @@
               <Group type="102" alignment="0" attributes="0">
                   <Component id="jToolBar3" min="-2" pref="21" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jSplitPane1" pref="473" max="32767" attributes="0"/>
+                  <Component id="jSplitPane1" pref="483" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -171,13 +171,13 @@
                         <DimensionLayout dim="0">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
-                              <Component id="jScrollPane2" alignment="0" pref="534" max="32767" attributes="0"/>
+                              <Component id="jScrollPane2" alignment="0" pref="676" max="32767" attributes="0"/>
                           </Group>
                         </DimensionLayout>
                         <DimensionLayout dim="1">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="1" attributes="0">
-                                  <Component id="jScrollPane2" pref="385" max="32767" attributes="0"/>
+                                  <Component id="jScrollPane2" pref="395" max="32767" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
                               </Group>
@@ -227,7 +227,7 @@
                                       <Component id="requestTime" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="231" max="-2" attributes="0"/>
                                       <Component id="rowCount" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace pref="291" max="32767" attributes="0"/>
+                                      <EmptySpace pref="433" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                             </DimensionLayout>
@@ -275,12 +275,12 @@
                       <Layout>
                         <DimensionLayout dim="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <EmptySpace min="0" pref="534" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="676" max="32767" attributes="0"/>
                           </Group>
                         </DimensionLayout>
                         <DimensionLayout dim="1">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <EmptySpace min="0" pref="413" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="423" max="32767" attributes="0"/>
                           </Group>
                         </DimensionLayout>
                       </Layout>
@@ -289,36 +289,56 @@
                 </Container>
               </SubComponents>
             </Container>
-            <Container class="javax.swing.JScrollPane" name="treePane">
+            <Container class="javax.swing.JPanel" name="jPanel4">
               <Properties>
-                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-                  <Border info="null"/>
-                </Property>
-                <Property name="name" type="java.lang.String" value="treePane" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="jPanel4" noResource="true"/>
               </Properties>
-              <AuxValues>
-                <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-              </AuxValues>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">
                   <JSplitPaneConstraints position="left"/>
                 </Constraint>
               </Constraints>
 
-              <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+              <Layout>
+                <DimensionLayout dim="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="treePane" alignment="0" pref="25" max="32767" attributes="0"/>
+                  </Group>
+                </DimensionLayout>
+                <DimensionLayout dim="1">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="treePane" alignment="1" pref="483" max="32767" attributes="0"/>
+                  </Group>
+                </DimensionLayout>
+              </Layout>
               <SubComponents>
-                <Component class="javax.swing.JTree" name="DatabaseTree">
+                <Container class="javax.swing.JScrollPane" name="treePane">
                   <Properties>
-                    <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-                      <Color id="Default Cursor"/>
+                    <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                      <Border info="null"/>
                     </Property>
-                    <Property name="name" type="java.lang.String" value="DatabaseTree" noResource="true"/>
+                    <Property name="name" type="java.lang.String" value="treePane" noResource="true"/>
                   </Properties>
-                  <Events>
-                    <EventHandler event="treeExpanded" listener="javax.swing.event.TreeExpansionListener" parameters="javax.swing.event.TreeExpansionEvent" handler="DatabaseTreeTreeExpanded"/>
-                    <EventHandler event="valueChanged" listener="javax.swing.event.TreeSelectionListener" parameters="javax.swing.event.TreeSelectionEvent" handler="DatabaseTreeValueChanged"/>
-                  </Events>
-                </Component>
+                  <AuxValues>
+                    <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+                  </AuxValues>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+                  <SubComponents>
+                    <Component class="javax.swing.JTree" name="DatabaseTree">
+                      <Properties>
+                        <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
+                          <Color id="Default Cursor"/>
+                        </Property>
+                        <Property name="name" type="java.lang.String" value="DatabaseTree" noResource="true"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="treeExpanded" listener="javax.swing.event.TreeExpansionListener" parameters="javax.swing.event.TreeExpansionEvent" handler="DatabaseTreeTreeExpanded"/>
+                        <EventHandler event="valueChanged" listener="javax.swing.event.TreeSelectionListener" parameters="javax.swing.event.TreeSelectionEvent" handler="DatabaseTreeValueChanged"/>
+                      </Events>
+                    </Component>
+                  </SubComponents>
+                </Container>
               </SubComponents>
             </Container>
           </SubComponents>
@@ -409,18 +429,18 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="statusPanelSeparator" alignment="0" pref="569" max="32767" attributes="0"/>
+              <Component id="statusPanelSeparator" alignment="0" pref="711" max="32767" attributes="0"/>
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="statusMessageLabel" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="545" max="32767" attributes="0"/>
+                  <EmptySpace pref="687" max="32767" attributes="0"/>
                   <Component id="statusAnimationLabel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace pref="138" max="32767" attributes="0"/>
-                  <Component id="progressBar" min="-2" pref="384" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="47" max="-2" attributes="0"/>
+                  <EmptySpace pref="401" max="32767" attributes="0"/>
+                  <Component id="progressBar" min="-2" pref="252" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="58" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -430,15 +450,13 @@
                   <Component id="statusPanelSeparator" min="-2" pref="2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="statusMessageLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="statusAnimationLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="statusMessageLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="statusAnimationLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Component id="progressBar" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -505,6 +523,6 @@
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
-    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,38,0,0,2,57"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,51,0,0,2,-57"/>
   </AuxValues>
 </Form>
