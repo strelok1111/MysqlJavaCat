@@ -1,0 +1,30 @@
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>dist\MysqlJavaCat.jar</jar>
+  <outfile>dist\MysqlJavaCat.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir></chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <customProcName>false</customProcName>
+  <stayAlive>false</stayAlive>
+  <manifest></manifest>
+  <icon></icon>
+  <classPath>
+    <mainClass>mysqljavacat.MysqlJavaCatApp</mainClass>
+    <cp>lib/appframework-1.0.3.jar</cp>
+    <cp>lib/swing-worker-1.1.jar</cp>
+    <cp>lib/jsch-0.1.44.jar</cp>
+    <cp>lib/jsyntaxpane-0.9.6.jar</cp>
+    <cp>lib/mysql-connector-java-5.1.6-bin.jar</cp>
+  </classPath>
+  <jre>
+    <path></path>
+    <minVersion>1.6.0_21</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+  </jre>
+</launch4jConfig>

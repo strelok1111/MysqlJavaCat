@@ -95,29 +95,29 @@ public class ComboDialog extends javax.swing.JDialog {
         DatabaseObj cur_db = main_frame.getSelectedDb();
         String [] parts = input.split("\\.");
         ArrayList<Object> query_tables = getQueryTables(cur_db);
-        if(input.length() == 0){
-            if(query_tables.size() == 1){
-                FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),null);                
-            }
+        if(input.length() == 0){            
             FilterAddList(out,new ArrayList<Object>(cur_db.getTables()),null);
             if(!query_tables.isEmpty()){
                 for(Object o : query_tables)
                     out.remove(o);
                 FilterAddList(out,query_tables,null,false);
-            }            
+            }
+            if(query_tables.size() == 1){
+                FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),null,false);
+            }
             FilterAddList(out,new ArrayList<Object>(FuncObj.getFucList()),null);
             FilterAddList(out,new ArrayList<Object>(db_map.values()),null);
-        }else if(parts.length == 1 && !input.endsWith(".")){
-            if(query_tables.size() == 1){
-                FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),parts[0]);
-
-            }
+        }else if(parts.length == 1 && !input.endsWith(".")){            
             FilterAddList(out,new ArrayList<Object>(cur_db.getTables()),parts[0]);
             if (!query_tables.isEmpty()) {
                 for(Object o : query_tables)
                     out.remove(o);
                 FilterAddList(out,query_tables,parts[0],false);
-            }            
+            }
+            if(query_tables.size() == 1){
+                FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),parts[0],false);
+
+            }
             FilterAddList(out,new ArrayList<Object>(FuncObj.getFucList()),parts[0]);
             FilterAddList(out,new ArrayList<Object>(db_map.values()),parts[0]);
         }else if(parts.length == 1 && input.endsWith(".")){            

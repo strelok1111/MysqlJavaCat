@@ -5,6 +5,10 @@ import java.util.HashMap;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import mysqljavacat.MysqlJavaCatApp;
+import mysqljavacat.MysqlJavaCatView;
 
 /**
  *
@@ -52,5 +56,23 @@ public class TableObj{
     }
     public DefaultMutableTreeNode getNode(){
         return node;
+    }
+    public void refereshTable(){
+        MysqlJavaCatView view = (MysqlJavaCatView)MysqlJavaCatApp.getApplication().getMainView();
+        fields.clear();
+        ArrayList<MutableTreeNode> childs = new ArrayList<MutableTreeNode>();
+        for(int i = 0;i < node.getChildCount();i = i + 1)
+            childs.add((MutableTreeNode)node.getChildAt(i));
+        for(MutableTreeNode n : childs)
+            ((DefaultTreeModel)view.getDbTree().getModel()).removeNodeFromParent(n);
+        ArrayList<ArrayList<Object>> fields_list = MysqlJavaCatApp.getApplication().getRows(MysqlJavaCatApp.getApplication().executeSql("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + getDatabase() + "' AND TABLE_NAME = '" + name + "'"));
+        int index = 0;
+        for( ArrayList<Object> field : fields_list){
+            DefaultMutableTreeNode field_node = new DefaultMutableTreeNode();
+            field_node.setUserObject(new FieldObj(field.get(0).toString(), this, field_node));
+            ((DefaultTreeModel)view.getDbTree().getModel()).insertNodeInto(field_node, node, index);
+            index = index + 1;
+        }
+        
     }
 }

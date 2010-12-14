@@ -43,6 +43,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import jsyntaxpane.DefaultSyntaxKit;
+import mysqljavacat.dialogs.ExportToExcel;
 import org.jdesktop.application.Task;
 
 /**
@@ -126,6 +127,7 @@ public class MysqlJavaCatView extends FrameView {
         DatabaseTree.setCellRenderer(cell);
         DatabaseTree.setRootVisible(false);
         DatabaseTree.setShowsRootHandles(true);
+
         
 
         MouseAdapter ma = new MouseAdapter() {
@@ -172,7 +174,42 @@ public class MysqlJavaCatView extends FrameView {
                             }
                         });
 
+                        JMenuItem menu_item1 = new JMenuItem();
+                        menu_item1.setText("Refresh(F5)");
+                        menu_item1.setIcon(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/arrow_refresh.png")));
+                        menu_item1.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                ((TableObj)node.getUserObject()).refereshTable();
+                            }
+                        });
+
+
                         popup.add(menu_item);
+                        popup.add(menu_item1);
+
+                        popup.show(tree, x, y);
+                    }else if(node.getUserObject().getClass() == DatabaseObj.class){
+                        JPopupMenu popup = new JPopupMenu();
+                        JMenuItem menu_item1 = new JMenuItem();
+                        menu_item1.setText("Refresh(F5)");
+                        menu_item1.setIcon(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/arrow_refresh.png")));
+                        menu_item1.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                Task task = new Task(application) {
+                                    @Override
+                                    protected Object doInBackground() throws Exception {
+                                        DatabaseTree.setEnabled(false);
+                                        selected_db.refreshDatabase(true,true);
+                                        DatabaseTree.setEnabled(true);
+                                        return null;
+                                    }
+                                };
+                                application.getContext().getTaskService().execute(task);
+                                application.getContext().getTaskMonitor().setForegroundTask(task);
+                            }
+                        });
+                        popup.add(menu_item1);
+
                         popup.show(tree, x, y);
                     }
                     
@@ -183,7 +220,7 @@ public class MysqlJavaCatView extends FrameView {
             }
             @Override
             public void mouseReleased(MouseEvent e) {
-                    if (e.isPopupTrigger()) myPopupEvent(e);
+                    if (e.isPopupTrigger()) myPopupEvent(e);                    
             }
             @Override
             public void mouseClicked(MouseEvent e){
@@ -196,8 +233,21 @@ public class MysqlJavaCatView extends FrameView {
                             return;
                     tree.setSelectionPath(path);
                     final DefaultMutableTreeNode node =(DefaultMutableTreeNode)path.getLastPathComponent();
-                    if(node.getUserObject().getClass() == TableObj.class)
-                        addDefSelect(node.getUserObject().toString());
+                    if(node.getUserObject().getClass() == TableObj.class){
+                        String text = tabs.getSelectedtab().getEditPane().getText();
+                        text.replace("\r\n", "\n");
+                        String before_caret = text.substring(0,tabs.getSelectedtab().getEditPane().getCaretPosition());
+                        String after_caret = text.substring(tabs.getSelectedtab().getEditPane().getCaretPosition(),text.length());
+                        text = before_caret + node.getUserObject().toString() + after_caret;                        
+                        text.replace("\n", "\r\n");
+                        tabs.getSelectedtab().getEditPane().setText(text);
+                        tabs.getSelectedtab().getEditPane().requestFocusInWindow();
+                        
+                        //TODO Prevent tree expand && set caret pos
+                        //tabs.getSelectedtab().getEditPane().setCaretPosition(tabs.getSelectedtab().getEditPane().getCaretPosition());
+                        //DatabaseTree.setToggleClickCount(0);
+                     }
+
                 }
             }
 
@@ -207,7 +257,21 @@ public class MysqlJavaCatView extends FrameView {
             @Override
             public void keyPressed(KeyEvent e){
                 if(e.getKeyCode() == 116){
-                    updateTree();
+                    Object node = DatabaseTree.getLastSelectedPathComponent();
+                    if(node.getClass() == TableObj.class){
+                        ((TableObj)node).refereshTable();
+                    }else if(node.getClass() == DatabaseObj.class){
+                        Task task = new Task(application) {
+                            @Override
+                            protected Object doInBackground() throws Exception {
+                                selected_db.refreshDatabase(true,true);
+                                return null;
+                            }
+                        };
+                        application.getContext().getTaskService().execute(task);
+                        application.getContext().getTaskMonitor().setForegroundTask(task);
+                    }
+
                 }
             }
         });
@@ -281,6 +345,9 @@ public class MysqlJavaCatView extends FrameView {
         }
         MysqlJavaCatApp.getApplication().show(aboutBox);
     }
+    public JTree getDbTree(){
+        return DatabaseTree;
+    }
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -316,6 +383,8 @@ public class MysqlJavaCatView extends FrameView {
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
         statusPanel = new javax.swing.JPanel();
@@ -550,6 +619,7 @@ public class MysqlJavaCatView extends FrameView {
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(mysqljavacat.MysqlJavaCatApp.class).getContext().getActionMap(MysqlJavaCatView.class, this);
         exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
+        exitMenuItem.setIcon(resourceMap.getIcon("exitMenuItem.icon")); // NOI18N
         exitMenuItem.setName("exitMenuItem"); // NOI18N
         fileMenu.add(exitMenuItem);
 
@@ -558,6 +628,7 @@ public class MysqlJavaCatView extends FrameView {
         jMenu1.setText(resourceMap.getString("jMenu1.text")); // NOI18N
         jMenu1.setName("jMenu1"); // NOI18N
 
+        jMenuItem1.setIcon(resourceMap.getIcon("jMenuItem1.icon")); // NOI18N
         jMenuItem1.setText(resourceMap.getString("jMenuItem1.text")); // NOI18N
         jMenuItem1.setName("jMenuItem1"); // NOI18N
         jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
@@ -569,10 +640,26 @@ public class MysqlJavaCatView extends FrameView {
 
         menuBar.add(jMenu1);
 
+        jMenu2.setText(resourceMap.getString("jMenu2.text")); // NOI18N
+        jMenu2.setName("jMenu2"); // NOI18N
+
+        jMenuItem2.setIcon(resourceMap.getIcon("jMenuItem2.icon")); // NOI18N
+        jMenuItem2.setText(resourceMap.getString("jMenuItem2.text")); // NOI18N
+        jMenuItem2.setName("jMenuItem2"); // NOI18N
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem2);
+
+        menuBar.add(jMenu2);
+
         helpMenu.setText(resourceMap.getString("helpMenu.text")); // NOI18N
         helpMenu.setName("helpMenu"); // NOI18N
 
         aboutMenuItem.setAction(actionMap.get("showAboutBox")); // NOI18N
+        aboutMenuItem.setIcon(resourceMap.getIcon("aboutMenuItem.icon")); // NOI18N
         aboutMenuItem.setName("aboutMenuItem"); // NOI18N
         helpMenu.add(aboutMenuItem);
 
@@ -768,9 +855,19 @@ public class MysqlJavaCatView extends FrameView {
 
     private void databaseComboItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_databaseComboItemStateChanged
         if(evt.getStateChange() == java.awt.event.ItemEvent.SELECTED){
-           application.executeSql("USE " + evt.getItem().toString());
-           selected_db = (DatabaseObj)evt.getItem();
-           upadateFiedlsCache(false);
+            application.executeSql("USE " + evt.getItem().toString());
+            selected_db = (DatabaseObj)evt.getItem();
+            Task task = new Task(application) {
+                @Override
+                protected Object doInBackground() throws Exception {
+                    DatabaseTree.setEnabled(false);
+                    selected_db.refreshDatabase(true,false);
+                    DatabaseTree.setEnabled(true);
+                    return null;
+                }
+            };
+            application.getContext().getTaskService().execute(task);
+            application.getContext().getTaskMonitor().setForegroundTask(task);
         }
     }//GEN-LAST:event_databaseComboItemStateChanged
 
@@ -780,7 +877,7 @@ public class MysqlJavaCatView extends FrameView {
             databaseCombo.setSelectedItem(node.getUserObject());
         }
         if(node.getUserObject().getClass() == TableObj.class){
-            databaseCombo.setSelectedItem(((TableObj)node.getUserObject()).getDatabase());
+            databaseCombo.setSelectedItem(((TableObj)node.getUserObject()).getDatabase());            
         }
     }//GEN-LAST:event_DatabaseTreeValueChanged
 
@@ -802,74 +899,50 @@ public class MysqlJavaCatView extends FrameView {
         queryTask.cancel(true);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        new ExportToExcel(application.getMainFrame(), true).setVisible(true);
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
     public void proxyRunConnect(){
         connectButtonActionPerformed(null);
     }
-
-    private void upadateFiedlsCache(final boolean force){
-        if(force || !selected_db.isSet()){           
-            RunButton.setEnabled(false);
-            databaseCombo.setEnabled(false);
-            disconnectButton.setEnabled(false);
-            DatabaseTree.setEnabled(false);
-            ArrayList<ArrayList<Object>> fields_list = application.getRows(application.executeSql("SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + selected_db + "'"));
-            for( ArrayList<Object> field : fields_list){
-                TableObj table = selected_db.getTable(field.get(0).toString());
-                DefaultMutableTreeNode field_node = new DefaultMutableTreeNode();
-                field_node.setUserObject(new FieldObj(field.get(1).toString(), table, field_node));
-                table.getNode().add(field_node);
-            }
-            RunButton.setEnabled(true);
-            databaseCombo.setEnabled(true);
-            DatabaseTree.setEnabled(true);
-            disconnectButton.setEnabled(true);
-            selected_db.setIsSet(true);
-        }
-        
-    }
-
-    private void updateTree(){
-        Task task = new Task(application) {
-            @Override
-            protected Object doInBackground() throws Exception {
-                DatabaseTree.setModel(null);
-                DatabaseTree.setEnabled(false);
-                RunButton.setEnabled(false);
-                javax.swing.tree.DefaultMutableTreeNode rootNode = new javax.swing.tree.DefaultMutableTreeNode("Databases");
-                DefaultComboBoxModel combo_model = new DefaultComboBoxModel();
-                ArrayList<ArrayList<Object>> all_databases  =  application.getRows(application.executeSql("SHOW DATABASES"));
-                for(ArrayList<Object> row :  all_databases){
-                    DefaultMutableTreeNode databaseNode = new DefaultMutableTreeNode();
-                    DatabaseObj database = new DatabaseObj(row.get(0).toString(),databaseNode);
-                    databaseNode.setUserObject(database);
-                    combo_model.addElement(database);               
-                    rootNode.add(databaseNode);
-                    application.executeSql("USE " + database);
-                    selected_db = database;                    
-                    setMessage("Database scan:" + database);
-                    ArrayList<ArrayList<Object>> tables_local = application.getRows(application.executeSql("SHOW TABLES"));
-                    for(ArrayList<Object> row_datatabasedb_tables : tables_local){
-                        DefaultMutableTreeNode table_node = new DefaultMutableTreeNode();
-                        TableObj table = new TableObj(row_datatabasedb_tables.get(0).toString(),database,table_node);
-                        table_node.setUserObject(table);
-                        databaseNode.add(table_node);
+    private void updateTree(){                
+                Task task = new Task(application) {
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        DatabaseTree.setModel(null);
+                        DatabaseTree.setEnabled(false);
+                        RunButton.setEnabled(false);
+                        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Databases");
+                        DatabaseTree.setModel(new DefaultTreeModel(rootNode));
+                        DefaultComboBoxModel combo_model = new DefaultComboBoxModel();
+                        ArrayList<ArrayList<Object>> all_databases  =  application.getRows(application.executeSql("SHOW DATABASES"));
+                        for(ArrayList<Object> row :  all_databases){
+                            DefaultMutableTreeNode databaseNode = new DefaultMutableTreeNode();
+                            DatabaseObj database = new DatabaseObj(row.get(0).toString(),databaseNode);
+                            databaseNode.setUserObject(database);
+                            combo_model.addElement(database);
+                            rootNode.add(databaseNode);
+                            selected_db = database;
+                            databases.put(database.toString(), database);
+                        }
+                        ((DefaultTreeModel)DatabaseTree.getModel()).reload();
+                        for(ArrayList<Object> row :  all_databases){
+                            setMessage("Database scan:" + row.get(0).toString());
+                            databases.get(row.get(0).toString()).refreshDatabase(false,false);
+                        }
+                        databaseCombo.setModel(combo_model);
+                        DatabaseTree.setEnabled(true);
+                        connectButton.setEnabled(false);
+                        disconnectButton.setEnabled(true);
+                        databaseCombo.setEnabled(true);
+                        RunButton.setEnabled(true);
+                        combo_model.setSelectedItem(selected_db);
+                        return null;
                     }
-                    databases.put(database.toString(), database);
-                }
-                combo_model.setSelectedItem(selected_db);
-                DatabaseTree.setModel(new DefaultTreeModel(rootNode));
-                databaseCombo.setModel(combo_model);                
-                DatabaseTree.setEnabled(true);
-                upadateFiedlsCache(false);
-                connectButton.setEnabled(false);
-                disconnectButton.setEnabled(true);
-                databaseCombo.setEnabled(true);
-                RunButton.setEnabled(true);
-                return null;
-            }
-        };       
-        application.getContext().getTaskService().execute(task);
-        application.getContext().getTaskMonitor().setForegroundTask(task);
+                };
+                application.getContext().getTaskService().execute(task);
+                application.getContext().getTaskMonitor().setForegroundTask(task);                     
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTree DatabaseTree;
@@ -880,7 +953,9 @@ public class MysqlJavaCatView extends FrameView {
     private javax.swing.JButton disconnectButton;
     private javax.swing.JSplitPane horisontalSplit;
     private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;

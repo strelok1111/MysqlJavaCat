@@ -25,10 +25,7 @@ public class DatabaseTreeCellRender extends DefaultTreeCellRenderer {
     public Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
         super.getTreeCellRendererComponent(tree, value, sel,expanded, leaf, row,hasFocus);
-        if(node.isRoot()){
-            setIcon(databases_icon);
-            setDisabledIcon(databases_icon);
-        } else if(node.getUserObject().getClass() == DatabaseObj.class){
+        if(node.getUserObject().getClass() == DatabaseObj.class){
             setIcon(((DatabaseObj)node.getUserObject()).getIcon());
             setDisabledIcon(((DatabaseObj)node.getUserObject()).getIcon());
         } else if(node.getUserObject().getClass() == TableObj.class){
