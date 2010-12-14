@@ -4,7 +4,6 @@
 
 package mysqljavacat;
 
-import mysqljavacat.dialogs.ErrorDialog;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Window;
@@ -29,7 +28,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 /**
@@ -37,18 +36,14 @@ import javax.swing.SwingUtilities;
  */
 public class MysqlJavaCatApp extends SingleFrameApplication {
     private Connection dbConnection;
-    private ErrorDialog errordialog;
     private Properties prop = new Properties();
-    public ErrorDialog getErrorDialog(){
-        return errordialog;
-    }
     public void saveToFile(String str,File file){
         PrintWriter fw = null;
         try {
             fw = new PrintWriter(file);
             fw.write(str);
         } catch (IOException ex) {
-            Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
+            showError(ex.getMessage());
         } finally {
             fw.close();
         }
@@ -72,10 +67,10 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
                 }
                 bufRead.close();
             } catch (IOException ex) {
-                Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
+                showError(ex.getMessage());
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
+            showError(ex.getMessage());
         }
         return outline;
     }
@@ -87,14 +82,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     }
 
     public void showError(String s){
-        if (errordialog == null) {
-            JFrame mainFrame = getMainFrame();
-            errordialog = new ErrorDialog(mainFrame,true);
-            errordialog.setLocationRelativeTo(mainFrame);
-        }
-
-        errordialog.getLabel().setText(s);
-        show(errordialog);
+        JOptionPane.showMessageDialog(null, s, "Error!!!", JOptionPane.ERROR_MESSAGE);
     }
 
     public void closeConnection(){
@@ -102,14 +90,14 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             dbConnection.close();
             dbConnection = null;
         } catch(Exception e){
-            e.printStackTrace();
+            showError(e.getMessage());
         }
     }
     public void connectToDb() throws SQLException{
         try {
             Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
+            showError(ex.getMessage());
         }
 
         String dsn = "jdbc:mysql://" + prop.getProperty("host") + ":3306";
@@ -158,7 +146,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             while(res.next())
                 out_array.add(res.getObject(col));
         }catch(Exception e){
-            e.printStackTrace();
+            showError(e.getMessage());
         }
         return out_array;
     }
@@ -171,7 +159,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
                 out_cols.add(res.getMetaData().getColumnLabel(i));
             }
         }catch(Exception e){
-            e.printStackTrace();
+            showError(e.getMessage());
         }
         return out_cols;
     }
@@ -188,7 +176,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
                 out_array.add(row);
             }
         }catch(Exception e){
-            e.printStackTrace();
+            showError(e.getMessage());
         }
         return out_array;
     }
@@ -202,14 +190,14 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         try {
             prop.load(new FileInputStream("dbProperties.properties"));
         } catch (IOException e) {
-            e.printStackTrace();
+            showError(e.getMessage());
         }
     }
      public void saveProp(){
         try {
             prop.store(new FileOutputStream("dbProperties.properties"), null);
         } catch (IOException e) {
-            e.printStackTrace();
+            showError(e.getMessage());
         }
     }
     /**
@@ -219,6 +207,9 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         loadProp();
         MysqlJavaCatView view = new MysqlJavaCatView(this);
         show(view);
+        if (!(new File("connectinos")).exists()) {
+            (new File("connectinos")).mkdir();
+        }
         if(getProperties().getProperty("connectOnStartUp","0").equals("1")){
             view.proxyRunConnect();
         }

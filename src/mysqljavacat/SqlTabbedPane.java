@@ -44,7 +44,7 @@ public class SqlTabbedPane extends JTabbedPane {
         if (!(new File("closed")).exists()) {
             (new File("closed")).mkdir();
         }
-
+        
         addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 MysqlJavaCatView view = (MysqlJavaCatView)MysqlJavaCatApp.getApplication().getMainView();
@@ -78,9 +78,9 @@ public class SqlTabbedPane extends JTabbedPane {
         tab.setFilename(new_name);
         tab.setTabLabel(new_name);
         tab.setSqlTab(this);
-        this.add(tab);
-        this.setTabComponentAt(this.getTabCount() - 1, tab.getTabHeader());
-        this.setSelectedIndex(this.getTabCount() - 1);        
+        add(tab);
+        setTabComponentAt(this.getTabCount() - 1, tab.getTabHeader());
+        setSelectedIndex(this.getTabCount() - 1);        
         return tab;
     }
     private String castName(String in,boolean flag){
@@ -106,15 +106,18 @@ public class SqlTabbedPane extends JTabbedPane {
         return tab;
     }
     public JEditorPane getCurrEditorPane(){
-        return ((SqlTab)this.getSelectedComponent()).getEditPane();
+        return ((SqlTab)getSelectedComponent()).getEditPane();
     }
     public List<SqlTab> getSqlTabs(){
         ArrayList<SqlTab> out = new ArrayList<SqlTab>();
-        for(int i = 0;i < this.getTabCount();i = i + 1)
-             out.add((SqlTab) this.getComponentAt(i));
+        for(int i = 0;i < getTabCount();i = i + 1)
+             out.add((SqlTab) getComponentAt(i));
         return out;
     }
     public SqlTab getSelectedtab(){
-        return getSqlTabs().get(getSelectedIndex());
+        if(getTabCount() == 0)
+            return null;
+        else
+            return getSqlTabs().get(getSelectedIndex());
     }
 }

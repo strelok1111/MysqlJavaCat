@@ -5,14 +5,8 @@
 
 package mysqljavacat;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
 import mysqljavacat.dialogs.ComboDialog;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.LayoutManager;
-import java.awt.LayoutManager2;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -24,7 +18,7 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.JButton;
+import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -33,8 +27,6 @@ import javax.swing.JScrollPane;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.table.DefaultTableModel;
-import org.w3c.dom.ls.LSException;
-import sun.swing.DefaultLayoutStyle;
 
 /**
  *
@@ -190,11 +182,7 @@ public class SqlTab extends JScrollPane{
             }
 
         });
-        JButton tabCloseButton = new JButton();
-        tabCloseButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/mysqljavacat/resources/button_cancel-16.png"))); // NOI18N
-        tabCloseButton.setPreferredSize(new Dimension(20, 20));
-        tabCloseButton.setBorderPainted(false);
-        tabCloseButton.setFocusPainted(false);
+        TabButton tabCloseButton = new TabButton();
         tabCloseButton.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ae) {
             if(sqlTab.getTabCount() == 1){
@@ -204,16 +192,15 @@ public class SqlTab extends JScrollPane{
           }
         });
         tab_label = new JLabel();
+        tab_label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));        
         tab_header = new JPanel();
+        tab_header.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
         tab_header.setOpaque(false);
         tab_header.add(tab_label);
+        tab_label.setFocusable(false);
+        tab_header.setFocusable(false);
         tab_header.setBorder(null);
-        FlowLayout la = new FlowLayout();
-        la.setHgap(3);
-        la.setVgap(0);
-        la.setAlignOnBaseline(true);
-        la.setAlignment(FlowLayout.LEFT);
-        tab_header.setLayout(la);
+        tab_header.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         tab_header.add(tabCloseButton);
     }
     public void close(){
