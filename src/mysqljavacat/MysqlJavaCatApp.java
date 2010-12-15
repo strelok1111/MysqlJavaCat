@@ -26,17 +26,26 @@ import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import mysqljavacat.dialogs.ConfigDialog;
 
 /**
  * The main class of the application.
  */
 public class MysqlJavaCatApp extends SingleFrameApplication {
     private Connection dbConnection;
+    private ConfigDialog config_dialog;
+    private MysqlJavaCatView view;
     private Properties prop = new Properties();
+
+    public MysqlJavaCatView getView(){
+        return view;
+    }
+    public ConfigDialog getConfigDialog(){
+        return config_dialog;
+    }
     public void saveToFile(String str,File file){
         PrintWriter fw = null;
         try {
@@ -99,16 +108,16 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         } catch (ClassNotFoundException ex) {
             showError(ex.getMessage());
         }
-
-        String dsn = "jdbc:mysql://" + prop.getProperty("host") + ":3306";
-        if(prop.getProperty("useSSH","0").equals("1")){
+        Properties propert = config_dialog.getCurConnect().getProperties();
+        String dsn = "jdbc:mysql://" + propert.getProperty("host") + ":3306";
+        if(propert.getProperty("useSSH","0").equals("1")){
             dsn = dsn
             + "?socketFactory=SSHSocketFactory"
-            + "&SSHHost=" + prop.getProperty("SSHhost")
-            + "&SSHUser=" + prop.getProperty("SSHuser")
-            + "&SSHPassword=" + prop.getProperty("SSHpass");
+            + "&SSHHost=" + propert.getProperty("SSHhost")
+            + "&SSHUser=" + propert.getProperty("SSHuser")
+            + "&SSHPassword=" + propert.getProperty("SSHpass");
         }
-        dbConnection = DriverManager.getConnection(dsn,prop.getProperty("user"), prop.getProperty("password"));
+        dbConnection = DriverManager.getConnection(dsn,propert.getProperty("user"), propert.getProperty("password"));
         
     }
 
@@ -188,7 +197,9 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
      */
     public void loadProp(){
         try {
-            prop.load(new FileInputStream("dbProperties.properties"));
+            File f = new File("dbProperties.properties");
+            f.createNewFile();
+            prop.load(new FileInputStream(f));
         } catch (IOException e) {
             showError(e.getMessage());
         }
@@ -203,13 +214,15 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     /**
      * At startup create and show the main frame of the application.
      */
-    @Override protected void startup() {
-        loadProp();
-        MysqlJavaCatView view = new MysqlJavaCatView(this);
-        show(view);
-        if (!(new File("connectinos")).exists()) {
-            (new File("connectinos")).mkdir();
+    @Override protected void startup() {        
+        if (!(new File("connections")).exists()) {
+            (new File("connections")).mkdir();
         }
+        loadProp();        
+        view = new MysqlJavaCatView(this);
+        config_dialog = new ConfigDialog(view.getFrame(),true);
+        config_dialog.setLocationRelativeTo(view.getFrame());
+        show(view);        
         if(getProperties().getProperty("connectOnStartUp","0").equals("1")){
             view.proxyRunConnect();
         }
@@ -219,7 +232,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
 
         @Override
         public void windowClosing(WindowEvent e) {
-                for(SqlTab tab : ((MysqlJavaCatView)getMainView()).getTabsMain().getSqlTabs()){
+                for(SqlTab tab : view.getTabsMain().getSqlTabs()){
                     File f = new File("current",tab.getFilename());
                     saveToFile(tab.getEditPane().getText(), f);
                 }

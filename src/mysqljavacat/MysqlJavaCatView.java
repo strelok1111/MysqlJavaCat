@@ -1,7 +1,6 @@
 package mysqljavacat;
 
 import mysqljavacat.dialogs.MysqlJavaCatAboutBox;
-import mysqljavacat.dialogs.ConfigDialog;
 import mysqljavacat.databaseobjects.DatabaseObj;
 import mysqljavacat.databaseobjects.TableObj;
 import mysqljavacat.renders.ColoredTableCellRenderer;
@@ -137,7 +136,7 @@ public class MysqlJavaCatView extends FrameView {
                         "FROM\n" +
                         "\t" + table;
                 tab.getEditPane().setText(query);
-                ((MysqlJavaCatView)application.getMainView()).RunButtonActionPerformed(null);
+                application.getView().RunButtonActionPerformed(null);
             }
             private void myPopupEvent(MouseEvent e) {
                     int x = e.getX();
@@ -849,8 +848,10 @@ public class MysqlJavaCatView extends FrameView {
             @Override
             public void finished() {
                 try {
-                    stmt.clearBatch();
-                    stmt.close();
+                    if(stmt != null){
+                        stmt.clearBatch();
+                        stmt.close();
+                    }
                     openGui();
                 } catch (SQLException ex) {
                     application.showError(ex.getMessage());
@@ -901,12 +902,7 @@ public class MysqlJavaCatView extends FrameView {
     }//GEN-LAST:event_DatabaseTreeValueChanged
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        if (confDialog == null) {
-            JFrame mainFrame = application.getMainFrame();
-            confDialog = new ConfigDialog(mainFrame,true);
-            confDialog.setLocationRelativeTo(mainFrame);
-        }
-        application.show(confDialog);
+        application.show(application.getConfigDialog());
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void DatabaseTreeTreeExpanded(javax.swing.event.TreeExpansionEvent evt) {//GEN-FIRST:event_DatabaseTreeTreeExpanded
@@ -924,7 +920,7 @@ public class MysqlJavaCatView extends FrameView {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         int response;
-        response = JOptionPane.showConfirmDialog(null, "Close all tabs?","choose",JOptionPane.OK_CANCEL_OPTION);
+        response = JOptionPane.showConfirmDialog(null, "Close all tabs?","",JOptionPane.OK_CANCEL_OPTION);
         if(response == JOptionPane.YES_OPTION){
             tabs.createTab(System.currentTimeMillis() + "");
             while(tabs.getSqlTabs().size() != 1){

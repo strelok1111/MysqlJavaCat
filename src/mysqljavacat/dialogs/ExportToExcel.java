@@ -56,7 +56,7 @@ public class ExportToExcel extends javax.swing.JDialog {
                     Task task = new Task(MysqlJavaCatApp.getApplication()) {
                         @Override
                         protected Object doInBackground() throws Exception {
-                            MysqlJavaCatView view = (MysqlJavaCatView)MysqlJavaCatApp.getApplication().getMainView();
+                            MysqlJavaCatView view = MysqlJavaCatApp.getApplication().getView();
                             PrintWriter fw = null;
                             try {
                                 fw = new PrintWriter(jFileChooser1.getSelectedFile());

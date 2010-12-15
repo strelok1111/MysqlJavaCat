@@ -58,7 +58,7 @@ public class TableObj{
         return node;
     }
     public void refereshTable(){
-        MysqlJavaCatView view = (MysqlJavaCatView)MysqlJavaCatApp.getApplication().getMainView();
+        MysqlJavaCatView view = MysqlJavaCatApp.getApplication().getView();
         fields.clear();
         ArrayList<MutableTreeNode> childs = new ArrayList<MutableTreeNode>();
         for(int i = 0;i < node.getChildCount();i = i + 1)

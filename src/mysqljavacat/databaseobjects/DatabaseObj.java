@@ -73,7 +73,7 @@ public class DatabaseObj {
 
         tables.clear();
 
-        MysqlJavaCatView view = (MysqlJavaCatView)MysqlJavaCatApp.getApplication().getMainView();
+        MysqlJavaCatView view = MysqlJavaCatApp.getApplication().getView();
         ArrayList<MutableTreeNode> childs = new ArrayList<MutableTreeNode>();
         for(int i = 0;i < node.getChildCount();i = i + 1)
             childs.add((MutableTreeNode)node.getChildAt(i));

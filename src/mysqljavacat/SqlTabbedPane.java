@@ -47,7 +47,7 @@ public class SqlTabbedPane extends JTabbedPane {
         
         addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                MysqlJavaCatView view = (MysqlJavaCatView)MysqlJavaCatApp.getApplication().getMainView();
+                MysqlJavaCatView view = MysqlJavaCatApp.getApplication().getView();
                 if (getSelectedtab().getResultColModel() != null){
                     view.getResultTable().setModel(getSelectedtab().getResultColModel());
                     TableColumnModel columns = view.getResultTable().getColumnModel();

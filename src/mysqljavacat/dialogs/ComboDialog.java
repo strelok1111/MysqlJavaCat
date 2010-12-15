@@ -90,7 +90,7 @@ public class ComboDialog extends javax.swing.JDialog {
     }
     public ArrayList<Object> getCoplList(String input){
         ArrayList<Object> out = new ArrayList<Object>();
-        MysqlJavaCatView main_frame = (MysqlJavaCatView)MysqlJavaCatApp.getApplication().getMainView();
+        MysqlJavaCatView main_frame = MysqlJavaCatApp.getApplication().getView();
         HashMap<String, DatabaseObj> db_map = main_frame.getDbMap();
         DatabaseObj cur_db = main_frame.getSelectedDb();
         String [] parts = input.split("\\.");

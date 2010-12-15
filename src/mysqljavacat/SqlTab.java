@@ -78,7 +78,6 @@ public class SqlTab extends JScrollPane{
         this.setViewportView(editor);
         editor.setContentType("text/sql");
         combo_dialog = new ComboDialog(editor);
-
         editor.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
 

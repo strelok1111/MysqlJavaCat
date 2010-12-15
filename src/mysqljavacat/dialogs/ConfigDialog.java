@@ -11,37 +11,121 @@
 
 package mysqljavacat.dialogs;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputMethodEvent;
+import java.awt.event.InputMethodListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import mysqljavacat.MysqlJavaCatApp;
-import mysqljavacat.MysqlJavaCatView;
+import mysqljavacat.databaseobjects.Connection;
 
 /**
  *
  * @author strelok
  */
 public class ConfigDialog extends javax.swing.JDialog {
+    private Connection cur_con;
+    
+    public void saveConnectionProps(){
+        cur_con.getProperties().setProperty("host", hostField.getText());
+        cur_con.getProperties().setProperty("user", userField.getText());
+        cur_con.getProperties().setProperty("password",new String(passField.getPassword()));
+        cur_con.getProperties().setProperty("SSHhost", sshHost.getText());
+        cur_con.getProperties().setProperty("SSHuser", sshUser.getText());
+        cur_con.getProperties().setProperty("SSHpass", new String(sshPass.getPassword()));
+        if(useSSHTun.isSelected())
+            cur_con.getProperties().setProperty("useSSH", "1");
+        else
+            cur_con.getProperties().setProperty("useSSH", "0");
+        Properties prop = MysqlJavaCatApp.getApplication().getProperties();
+        if(connectOnStartup.isSelected())
+            prop.setProperty("connectOnStartUp", "1");
+        else
+            prop.setProperty("connectOnStartUp", "0");
+        MysqlJavaCatApp.getApplication().saveProp();
+        cur_con.save();
+    }
+    public void loadConnectionProps(){
+        hostField.setText(cur_con.getProperties().getProperty("host"));
+        userField.setText(cur_con.getProperties().getProperty("user"));
+        passField.setText(cur_con.getProperties().getProperty("password"));
+        sshHost.setText(cur_con.getProperties().getProperty("SSHhost"));
+        sshUser.setText(cur_con.getProperties().getProperty("SSHuser"));
+        sshPass.setText(cur_con.getProperties().getProperty("SSHpass"));;
+        if(cur_con.getProperties().getProperty("useSSH","0").equals("1") && !useSSHTun.isSelected()){
+            useSSHTun.doClick();
+        }else if(cur_con.getProperties().getProperty("useSSH","0").equals("0") && useSSHTun.isSelected()){
+            useSSHTun.doClick();
+        }
+    }
 
-    /** Creates new form ConfigDialog */
+    public Connection getCurConnect(){
+        return cur_con;
+    }
+
     public ConfigDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();        
         Properties prop = MysqlJavaCatApp.getApplication().getProperties();
-        hostField.setText(prop.getProperty("host"));
-        userField.setText(prop.getProperty("user"));
-        passField.setText(prop.getProperty("password"));
-        sshHost.setText(prop.getProperty("SSHhost"));
-        sshUser.setText(prop.getProperty("SSHuser"));
-        sshPass.setText(prop.getProperty("SSHpass"));
-        if(prop.getProperty("useSSH","0").equals("1")){
-            useSSHTun.doClick();            
+        ArrayList<Connection> connections = Connection.getConnections();
+        DefaultComboBoxModel model = new DefaultComboBoxModel();
+        connectCombo.setModel(model);
+        if(connections.isEmpty()){
+            newConActionPerformed(null);
+            prop.setProperty("connectOnStartUp", "0");            
+        }else{            
+            for(Connection con : connections){
+                model.addElement(con);
+                if(prop.getProperty("current_con") != null && prop.getProperty("current_con").equals(con.getUniqName())){
+                    cur_con = con;
+                    model.setSelectedItem(con);
+                }
+            }
+            if(cur_con == null){
+                cur_con = connections.get(0);
+                model.setSelectedItem(connections.get(0));
+            }            
         }
+        
         if(prop.getProperty("connectOnStartUp","0").equals("1")){
             connectOnStartup.doClick();
         }
         setResizable(false);
+
+        KeyListener input_listener= new KeyListener() {
+
+            public void keyTyped(KeyEvent e) {
+                saveCon.setEnabled(true);
+            }
+
+            public void keyPressed(KeyEvent e) {
+            }
+
+            public void keyReleased(KeyEvent e) {
+            }
+        };
+        userField.addKeyListener(input_listener);
+        
+        userField.addKeyListener(input_listener);
+        hostField.addKeyListener(input_listener);
+        passField.addKeyListener(input_listener);
+        sshHost.addKeyListener(input_listener);
+        sshUser.addKeyListener(input_listener);
+        sshPass.addKeyListener(input_listener);
+        useSSHTun.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                saveCon.setEnabled(true);
+            }
+        });
+
     }
 
     /** This method is called from within the constructor to
@@ -73,7 +157,12 @@ public class ConfigDialog extends javax.swing.JDialog {
         sshPass = new javax.swing.JPasswordField();
         connectOnStartup = new javax.swing.JCheckBox();
         testConnection = new javax.swing.JButton();
-        jComboBox1 = new javax.swing.JComboBox();
+        connectCombo = new javax.swing.JComboBox();
+        newCon = new javax.swing.JButton();
+        saveCon = new javax.swing.JButton();
+        DeleteCon = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        editConName = new javax.swing.JButton();
 
         setName("Form"); // NOI18N
 
@@ -126,9 +215,9 @@ public class ConfigDialog extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(passField)
-                    .addComponent(userField)
-                    .addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(40, Short.MAX_VALUE))
+                    .addComponent(userField, javax.swing.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE)
+                    .addComponent(hostField))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -193,9 +282,9 @@ public class ConfigDialog extends javax.swing.JDialog {
                             .addComponent(jLabel4))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(sshUser, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE)
-                            .addComponent(sshPass, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE)
-                            .addComponent(sshHost, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE))))
+                            .addComponent(sshUser, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
+                            .addComponent(sshPass, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
+                            .addComponent(sshHost, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -231,14 +320,51 @@ public class ConfigDialog extends javax.swing.JDialog {
             }
         });
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox1.setName("jComboBox1"); // NOI18N
+        connectCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        connectCombo.setName("connectCombo"); // NOI18N
+        connectCombo.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                connectComboItemStateChanged(evt);
+            }
+        });
+
+        newCon.setText(resourceMap.getString("newCon.text")); // NOI18N
+        newCon.setName("newCon"); // NOI18N
+        newCon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newConActionPerformed(evt);
+            }
+        });
+
+        saveCon.setText(resourceMap.getString("saveCon.text")); // NOI18N
+        saveCon.setEnabled(false);
+        saveCon.setName("saveCon"); // NOI18N
+        saveCon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveConActionPerformed(evt);
+            }
+        });
+
+        DeleteCon.setText(resourceMap.getString("DeleteCon.text")); // NOI18N
+        DeleteCon.setEnabled(false);
+        DeleteCon.setName("DeleteCon"); // NOI18N
+
+        jLabel7.setText(resourceMap.getString("jLabel7.text")); // NOI18N
+        jLabel7.setName("jLabel7"); // NOI18N
+
+        editConName.setText(resourceMap.getString("editConName.text")); // NOI18N
+        editConName.setName("editConName"); // NOI18N
+        editConName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editConNameActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -248,19 +374,37 @@ public class ConfigDialog extends javax.swing.JDialog {
                         .addComponent(cancelButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(testConnection))
-                    .addComponent(connectOnStartup)))
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(27, Short.MAX_VALUE))
+                    .addComponent(connectOnStartup)
+                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(newCon)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(saveCon)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(DeleteCon)
+                        .addContainerGap(198, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addGap(18, 18, 18)
+                        .addComponent(connectCombo, 0, 227, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(editConName, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jComboBox1, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(newCon)
+                    .addComponent(saveCon)
+                    .addComponent(DeleteCon))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(connectCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(editConName))
+                .addGap(12, 12, 12)
                 .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(connectOnStartup)
@@ -269,7 +413,7 @@ public class ConfigDialog extends javax.swing.JDialog {
                     .addComponent(okButton)
                     .addComponent(cancelButton)
                     .addComponent(testConnection))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -277,29 +421,22 @@ public class ConfigDialog extends javax.swing.JDialog {
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         setVisible(false);
+        loadConnectionProps();
+        saveCon.setEnabled(false);
+        /*TODO
+         * remove empty connections
+         */
+        //for(int i = 0;connectCombo.getModel().getSize()<i;i = i + 1){
+        //    if(!((Connection)connectCombo.getModel().getElementAt(i)).isSaved()){
+        //        ((DefaultComboBoxModel) connectCombo.getModel()).removeElement(connectCombo.getModel().getElementAt(i));
+        //    }
+        //}
     }//GEN-LAST:event_cancelButtonActionPerformed
-    private void setProps(){
-        Properties prop = MysqlJavaCatApp.getApplication().getProperties();
-        prop.setProperty("host", hostField.getText());
-        prop.setProperty("user", userField.getText());
-        prop.setProperty("password",new String(passField.getPassword()));
-        prop.setProperty("SSHhost", sshHost.getText());
-        prop.setProperty("SSHuser", sshUser.getText());
-        prop.setProperty("SSHpass", new String(sshPass.getPassword()));
-        if(useSSHTun.isSelected())
-            prop.setProperty("useSSH", "1");
-        else
-            prop.setProperty("useSSH", "0");
-        if(connectOnStartup.isSelected())
-            prop.setProperty("connectOnStartUp", "1");
-        else
-            prop.setProperty("connectOnStartUp", "0");
-        MysqlJavaCatApp.getApplication().saveProp();
-    }
+
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-        setProps();
+        saveConnectionProps();
         setVisible(false);
-        ((MysqlJavaCatView) MysqlJavaCatApp.getApplication().getMainView()).proxyRunConnect();        
+        MysqlJavaCatApp.getApplication().getView().proxyRunConnect();
     }//GEN-LAST:event_okButtonActionPerformed
 
     private void useSSHTunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_useSSHTunMouseClicked
@@ -310,7 +447,7 @@ public class ConfigDialog extends javax.swing.JDialog {
 
     private void testConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testConnectionActionPerformed
         try {
-            setProps();
+            saveConnectionProps();
             MysqlJavaCatApp.getApplication().connectToDb();
             MysqlJavaCatApp.getApplication().showError("Connection OK!");
         } catch (SQLException ex) {
@@ -318,22 +455,49 @@ public class ConfigDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_testConnectionActionPerformed
 
+    private void connectComboItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_connectComboItemStateChanged
+        cur_con = (Connection)evt.getItem();
+        loadConnectionProps();
+    }//GEN-LAST:event_connectComboItemStateChanged
+
+    private void editConNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editConNameActionPerformed
+        cur_con.setName(JOptionPane.showInputDialog("Input connection name"));
+    }//GEN-LAST:event_editConNameActionPerformed
+
+    private void saveConActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveConActionPerformed
+        saveCon.setEnabled(false);
+        cur_con.save();
+    }//GEN-LAST:event_saveConActionPerformed
+
+    private void newConActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newConActionPerformed
+        cur_con = new Connection();
+        cur_con.getProperties().setProperty("name", "New Connection");
+        ((DefaultComboBoxModel)connectCombo.getModel()).addElement(cur_con);
+        saveCon.setEnabled(true);
+        connectCombo.setSelectedItem(cur_con);
+    }//GEN-LAST:event_newConActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton DeleteCon;
     private javax.swing.JButton cancelButton;
+    private javax.swing.JComboBox connectCombo;
     private javax.swing.JCheckBox connectOnStartup;
+    private javax.swing.JButton editConName;
     private javax.swing.JTextField hostField;
-    private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JButton newCon;
     private javax.swing.JButton okButton;
     private javax.swing.JPasswordField passField;
+    private javax.swing.JButton saveCon;
     private javax.swing.JTextField sshHost;
     private javax.swing.JPasswordField sshPass;
     private javax.swing.JTextField sshUser;
