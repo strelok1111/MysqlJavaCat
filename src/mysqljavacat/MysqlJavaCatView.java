@@ -37,6 +37,7 @@ import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.MenuElement;
 import javax.swing.event.TreeSelectionEvent;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -89,6 +90,7 @@ public class MysqlJavaCatView extends FrameView {
         super(app);        
         DefaultSyntaxKit.initKit();
         initComponents();
+        jTabbedPane1.setSelectedIndex(0);
         getFrame().setTitle("Mysql Java Based Object Browser");
         getFrame().setIconImage(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/databases.png")).getImage());
         tabs = new SqlTabbedPane();
@@ -123,10 +125,10 @@ public class MysqlJavaCatView extends FrameView {
         DatabaseTree.setModel(null);
         DatabaseTree.setCellRenderer(cell);
         DatabaseTree.setRootVisible(false);
-        DatabaseTree.setShowsRootHandles(true);
-
-        
-
+        DatabaseTree.setShowsRootHandles(true);        
+        propText.setContentType("text/sql");
+        propText.setEditable(false);
+        propText.setEnabled(true);
         MouseAdapter ma = new MouseAdapter() {
             private void addDefSelect(String table){
                 SqlTab tab = tabs.createTab(table + ".sql");
@@ -376,6 +378,8 @@ public class MysqlJavaCatView extends FrameView {
         requestTime = new javax.swing.JLabel();
         rowCount = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        propText = new javax.swing.JEditorPane();
         jPanel4 = new javax.swing.JPanel();
         treePane = new javax.swing.JScrollPane();
         DatabaseTree = new javax.swing.JTree();
@@ -495,6 +499,7 @@ public class MysqlJavaCatView extends FrameView {
         horisontalSplit.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         horisontalSplit.setName("horisontalSplit"); // NOI18N
 
+        jTabbedPane1.setFocusable(false);
         jTabbedPane1.setName("jTabbedPane1"); // NOI18N
 
         jPanel1.setName("jPanel1"); // NOI18N
@@ -564,15 +569,22 @@ public class MysqlJavaCatView extends FrameView {
 
         jPanel3.setName("jPanel3"); // NOI18N
 
+        jScrollPane1.setBorder(null);
+        jScrollPane1.setEnabled(false);
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
+        propText.setName("propText"); // NOI18N
+        jScrollPane1.setViewportView(propText);
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 676, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 676, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 423, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab(resourceMap.getString("jPanel3.TabConstraints.tabTitle"), jPanel3); // NOI18N
@@ -731,6 +743,7 @@ public class MysqlJavaCatView extends FrameView {
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
         try {
             connectButton.setEnabled(false);
+            resultTable.setModel(new DefaultTableModel());
             application.connectToDb();
             if(application.getConnection() != null){
                 updateTree();
@@ -741,7 +754,7 @@ public class MysqlJavaCatView extends FrameView {
     }//GEN-LAST:event_connectButtonActionPerformed
 
     private void RunButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RunButtonActionPerformed
-
+        jTabbedPane1.setSelectedIndex(0);
         queryTask = new Task(application) {
             private Statement stmt;
             private ResultSet r1;
@@ -883,6 +896,8 @@ public class MysqlJavaCatView extends FrameView {
                     DatabaseTree.setEnabled(false);
                     selected_db.refreshDatabase(true,false);
                     DatabaseTree.setEnabled(true);
+                    DatabaseTree.updateUI();
+                    DatabaseTree.repaint();
                     return null;
                 }
             };
@@ -897,7 +912,9 @@ public class MysqlJavaCatView extends FrameView {
             databaseCombo.setSelectedItem(node.getUserObject());
         }
         if(node.getUserObject().getClass() == TableObj.class){
-            databaseCombo.setSelectedItem(((TableObj)node.getUserObject()).getDatabase());            
+            databaseCombo.setSelectedItem(((TableObj)node.getUserObject()).getDatabase());
+            String createTable = application.getRows(application.executeSql("SHOW CREATE TABLE " + node.getUserObject())).get(0).get(1).toString();
+            propText.setText(createTable);
         }
     }//GEN-LAST:event_DatabaseTreeValueChanged
 
@@ -955,9 +972,7 @@ public class MysqlJavaCatView extends FrameView {
                             selected_db = database;
                             databases.put(database.toString(), database);
                         }
-                        ((DefaultTreeModel)DatabaseTree.getModel()).reload();
-                        DatabaseTree.updateUI();
-                        DatabaseTree.repaint();
+                        ((DefaultTreeModel)DatabaseTree.getModel()).reload();                       
                         for(ArrayList<Object> row :  all_databases){
                             setMessage("Database scan:" + row.get(0).toString());
                             databases.get(row.get(0).toString()).refreshDatabase(false,false);
@@ -992,6 +1007,7 @@ public class MysqlJavaCatView extends FrameView {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JSplitPane jSplitPane1;
@@ -1000,6 +1016,7 @@ public class MysqlJavaCatView extends FrameView {
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JProgressBar progressBar;
+    private javax.swing.JEditorPane propText;
     private javax.swing.JLabel requestTime;
     private javax.swing.JTable resultTable;
     private javax.swing.JLabel rowCount;

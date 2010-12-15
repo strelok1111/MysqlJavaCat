@@ -26,7 +26,6 @@ import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import mysqljavacat.dialogs.ConfigDialog;
@@ -36,6 +35,7 @@ import mysqljavacat.dialogs.ConfigDialog;
  */
 public class MysqlJavaCatApp extends SingleFrameApplication {
     private Connection dbConnection;
+    private mysqljavacat.databaseobjects.Connection est_connection;
     private ConfigDialog config_dialog;
     private MysqlJavaCatView view;
     private Properties prop = new Properties();
@@ -102,13 +102,9 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             showError(e.getMessage());
         }
     }
-    public void connectToDb() throws SQLException{
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-        } catch (ClassNotFoundException ex) {
-            showError(ex.getMessage());
-        }
-        Properties propert = config_dialog.getCurConnect().getProperties();
+    public Connection setupConnection(mysqljavacat.databaseobjects.Connection con) throws SQLException,ClassNotFoundException{
+        Class.forName("com.mysql.jdbc.Driver");        
+        Properties propert = con.getProperties();
         String dsn = "jdbc:mysql://" + propert.getProperty("host") + ":3306";
         if(propert.getProperty("useSSH","0").equals("1")){
             dsn = dsn
@@ -117,8 +113,18 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             + "&SSHUser=" + propert.getProperty("SSHuser")
             + "&SSHPassword=" + propert.getProperty("SSHpass");
         }
-        dbConnection = DriverManager.getConnection(dsn,propert.getProperty("user"), propert.getProperty("password"));
-        
+        return DriverManager.getConnection(dsn,propert.getProperty("user"), propert.getProperty("password"));
+    }
+    public void connectToDb() throws SQLException{        
+        try{
+            dbConnection = setupConnection(config_dialog.getCurConnect());
+            est_connection = config_dialog.getCurConnect();
+        }catch(ClassNotFoundException e){
+            showError(e.getMessage());
+        }
+    }
+    public mysqljavacat.databaseobjects.Connection getEstablishedConnection(){
+        return est_connection;
     }
 
     public Object executeCustom(String sql){

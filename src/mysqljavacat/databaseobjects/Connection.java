@@ -19,6 +19,7 @@ public class Connection {
     }  
     public Connection(File file_in){
         file = file_in;
+        saved = true;
         load();
     }
     public boolean isSaved(){
@@ -34,8 +35,9 @@ public class Connection {
     }
     public final void load(){
         try {
-            file.createNewFile();
-            prop.load(new FileInputStream(file));
+            if(file.exists()){
+                prop.load(new FileInputStream(file));
+            }
         } catch (IOException ex) {
             MysqlJavaCatApp.getApplication().showError(ex.getMessage());
         }
@@ -50,6 +52,10 @@ public class Connection {
 
     public void setName(String s){
         prop.setProperty("name", s + "");
+    }
+
+    public void remove(){
+       file.delete();
     }
 
     public String getUniqName(){

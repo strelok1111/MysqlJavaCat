@@ -11,10 +11,6 @@
 
 package mysqljavacat.dialogs;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputMethodEvent;
-import java.awt.event.InputMethodListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.sql.SQLException;
@@ -49,11 +45,10 @@ public class ConfigDialog extends javax.swing.JDialog {
         if(connectOnStartup.isSelected())
             prop.setProperty("connectOnStartUp", "1");
         else
-            prop.setProperty("connectOnStartUp", "0");
-        MysqlJavaCatApp.getApplication().saveProp();
-        cur_con.save();
+            prop.setProperty("connectOnStartUp", "0");        
     }
     public void loadConnectionProps(){
+        cur_con.load();
         hostField.setText(cur_con.getProperties().getProperty("host"));
         userField.setText(cur_con.getProperties().getProperty("user"));
         passField.setText(cur_con.getProperties().getProperty("password"));
@@ -164,6 +159,7 @@ public class ConfigDialog extends javax.swing.JDialog {
         jLabel7 = new javax.swing.JLabel();
         editConName = new javax.swing.JButton();
 
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setName("Form"); // NOI18N
 
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(mysqljavacat.MysqlJavaCatApp.class).getContext().getResourceMap(ConfigDialog.class);
@@ -346,8 +342,12 @@ public class ConfigDialog extends javax.swing.JDialog {
         });
 
         DeleteCon.setText(resourceMap.getString("DeleteCon.text")); // NOI18N
-        DeleteCon.setEnabled(false);
         DeleteCon.setName("DeleteCon"); // NOI18N
+        DeleteCon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DeleteConActionPerformed(evt);
+            }
+        });
 
         jLabel7.setText(resourceMap.getString("jLabel7.text")); // NOI18N
         jLabel7.setName("jLabel7"); // NOI18N
@@ -420,23 +420,38 @@ public class ConfigDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        setVisible(false);
         loadConnectionProps();
         saveCon.setEnabled(false);
-        /*TODO
-         * remove empty connections
-         */
-        //for(int i = 0;connectCombo.getModel().getSize()<i;i = i + 1){
-        //    if(!((Connection)connectCombo.getModel().getElementAt(i)).isSaved()){
-        //        ((DefaultComboBoxModel) connectCombo.getModel()).removeElement(connectCombo.getModel().getElementAt(i));
-        //    }
-        //}
+        ArrayList<Connection> to_rem = new ArrayList<Connection>();
+        for(int i = 0;connectCombo.getModel().getSize() > i;i = i + 1){            
+            if(!((Connection)connectCombo.getModel().getElementAt(i)).isSaved()){
+                to_rem.add((Connection)connectCombo.getModel().getElementAt(i));
+            }
+        }        
+        for(Connection c : to_rem){
+            ((DefaultComboBoxModel) connectCombo.getModel()).removeElement(c);
+        }
+        connectCombo.setSelectedItem(MysqlJavaCatApp.getApplication().getEstablishedConnection());
+        setVisible(false);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-        saveConnectionProps();
-        setVisible(false);
-        MysqlJavaCatApp.getApplication().getView().proxyRunConnect();
+        try {
+            MysqlJavaCatApp.getApplication().getProperties().setProperty("current_con", cur_con.getUniqName());
+            saveConnectionProps();
+            java.sql.Connection db_connect = MysqlJavaCatApp.getApplication().setupConnection(cur_con);
+            if(db_connect != null){
+                setVisible(false);
+                MysqlJavaCatApp.getApplication().getView().proxyRunConnect();
+                MysqlJavaCatApp.getApplication().saveProp();
+                cur_con.save();
+            }
+        } catch (SQLException ex) {            
+            MysqlJavaCatApp.getApplication().showError(ex.getMessage());
+        } catch (ClassNotFoundException ex) {
+            MysqlJavaCatApp.getApplication().showError(ex.getMessage());
+        }
+
     }//GEN-LAST:event_okButtonActionPerformed
 
     private void useSSHTunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_useSSHTunMouseClicked
@@ -448,9 +463,12 @@ public class ConfigDialog extends javax.swing.JDialog {
     private void testConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testConnectionActionPerformed
         try {
             saveConnectionProps();
-            MysqlJavaCatApp.getApplication().connectToDb();
-            MysqlJavaCatApp.getApplication().showError("Connection OK!");
+            java.sql.Connection db_connect = MysqlJavaCatApp.getApplication().setupConnection(cur_con);
+            if(db_connect != null)
+                JOptionPane.showMessageDialog(this,"OK","Connection OK!",JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
+            MysqlJavaCatApp.getApplication().showError(ex.getMessage());
+        } catch (ClassNotFoundException ex) {
             MysqlJavaCatApp.getApplication().showError(ex.getMessage());
         }
     }//GEN-LAST:event_testConnectionActionPerformed
@@ -461,7 +479,9 @@ public class ConfigDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_connectComboItemStateChanged
 
     private void editConNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editConNameActionPerformed
-        cur_con.setName(JOptionPane.showInputDialog("Input connection name"));
+        cur_con.setName(JOptionPane.showInputDialog("Input connection name",connectCombo.getModel().getSelectedItem()));
+        connectCombo.repaint();
+
     }//GEN-LAST:event_editConNameActionPerformed
 
     private void saveConActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveConActionPerformed
@@ -476,6 +496,11 @@ public class ConfigDialog extends javax.swing.JDialog {
         saveCon.setEnabled(true);
         connectCombo.setSelectedItem(cur_con);
     }//GEN-LAST:event_newConActionPerformed
+
+    private void DeleteConActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteConActionPerformed
+        connectCombo.removeItem(cur_con);
+        cur_con.remove();
+    }//GEN-LAST:event_DeleteConActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton DeleteCon;
