@@ -8,7 +8,7 @@ import javax.swing.ImageIcon;
  *
  * @author strelok
  */
-public class FuncObj {
+public class FuncObj  implements CompleteObj{
     private  Icon icon = new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/cog.png"));
     private String name;
     private static final ArrayList<FuncObj> obj_list = new ArrayList<FuncObj>();
@@ -20,6 +20,9 @@ public class FuncObj {
     }
     public Icon getIcon(){
         return icon;
+    }
+    public String getName(){
+        return name;
     }
     @Override
     public String toString(){

@@ -18,7 +18,7 @@ import mysqljavacat.MysqlJavaCatView;
  *
  * @author strelok
  */
-public class DatabaseObj {
+public class DatabaseObj implements CompleteObj {
     private String name;
     private boolean isSet = false;
     private DefaultMutableTreeNode node;
@@ -83,13 +83,10 @@ public class DatabaseObj {
         ArrayList<ArrayList<Object>> fields_list;
         if(with_fields){
             isSet = true;
-            fields_list = MysqlJavaCatApp.getApplication().getRows(MysqlJavaCatApp.getApplication().executeSql("SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + name + "'"));
+            fields_list = MysqlJavaCatApp.getApplication().getRows(MysqlJavaCatApp.getApplication().executeSql("SELECT TABLE_NAME,COLUMN_NAME,DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + name + "'"));
         }else{
             fields_list = MysqlJavaCatApp.getApplication().getRows(MysqlJavaCatApp.getApplication().executeSql("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = '" + name + "'"));
         }
-        int table_index = 0;
-        int field_index = 0;
-               
         for( ArrayList<Object> field : fields_list){
             TableObj table = getTable(field.get(0).toString());
             DefaultMutableTreeNode table_node;
@@ -98,17 +95,14 @@ public class DatabaseObj {
                 table = new TableObj(field.get(0).toString(), this, table_node);
                 table_node.setUserObject(table);
                 ((DefaultTreeModel)view.getDbTree().getModel()).insertNodeInto(table_node, node, node.getChildCount());
-                table_index = table_index + 1;
-                field_index = 0;
             }else{
                 table_node = table.getNode();
             }
             if(with_fields){
                 DefaultMutableTreeNode field_node = new DefaultMutableTreeNode();
-                FieldObj field_obj = new FieldObj(field.get(1).toString(), table, field_node);
+                FieldObj field_obj = new FieldObj(field.get(1).toString(),field.get(2).toString(), table, field_node);
                 field_node.setUserObject(field_obj);
                 ((DefaultTreeModel)view.getDbTree().getModel()).insertNodeInto(field_node, table_node, table_node.getChildCount());
-                field_index = field_index + 1;
             }
         }
     }

@@ -14,18 +14,22 @@ import mysqljavacat.MysqlJavaCatView;
  *
  * @author strelok
  */
-public class TableObj{
-    private  Icon icon = new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/table.png"));
+public class TableObj  implements CompleteObj{
+    private Icon icon = new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/table.png"));
     private DatabaseObj database;
     private HashMap<String,FieldObj> fields = new HashMap<String,FieldObj>();
     private String name;
     private DefaultMutableTreeNode node;
+    private TableObj alias_from;
 
     public TableObj(String name_t,DatabaseObj db,DefaultMutableTreeNode treenode){
         node = treenode;
         name = name_t;
         database = db;
         database.addTable(this);
+    }
+    private TableObj(String name_t){
+        name = name_t;
     }
        
     public Icon getIcon(){
@@ -65,14 +69,21 @@ public class TableObj{
             childs.add((MutableTreeNode)node.getChildAt(i));
         for(MutableTreeNode n : childs)
             ((DefaultTreeModel)view.getDbTree().getModel()).removeNodeFromParent(n);
-        ArrayList<ArrayList<Object>> fields_list = MysqlJavaCatApp.getApplication().getRows(MysqlJavaCatApp.getApplication().executeSql("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + getDatabase() + "' AND TABLE_NAME = '" + name + "'"));
-        int index = 0;
+        ArrayList<ArrayList<Object>> fields_list = MysqlJavaCatApp.getApplication().getRows(MysqlJavaCatApp.getApplication().executeSql("SELECT COLUMN_NAME,DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" + getDatabase() + "' AND TABLE_NAME = '" + name + "'"));
         for( ArrayList<Object> field : fields_list){
             DefaultMutableTreeNode field_node = new DefaultMutableTreeNode();
-            field_node.setUserObject(new FieldObj(field.get(0).toString(), this, field_node));
-            ((DefaultTreeModel)view.getDbTree().getModel()).insertNodeInto(field_node, node, index);
-            index = index + 1;
+            field_node.setUserObject(new FieldObj(field.get(0).toString(),field.get(1).toString(), this, field_node));
+            ((DefaultTreeModel)view.getDbTree().getModel()).insertNodeInto(field_node, node, node.getChildCount());
         }
         
+    }
+    public String getName(){
+        return name;
+    }
+    public TableObj createAlias(String name){
+        TableObj al = new TableObj(name);
+        al.alias_from = this;
+        al.fields = this.fields;
+        return al;
     }
 }

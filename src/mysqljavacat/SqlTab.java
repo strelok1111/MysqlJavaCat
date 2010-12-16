@@ -9,10 +9,12 @@ import mysqljavacat.dialogs.ComboDialog;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -24,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.table.DefaultTableModel;
@@ -191,16 +194,42 @@ public class SqlTab extends JScrollPane{
           }
         });
         tab_label = new JLabel();
-        tab_label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));        
         tab_header = new JPanel();
+        /*
+         * TODO edit tab header
+        final JTextField tab_edit = new JTextField();
+        tab_edit.setSize(100, 8);
+        tab_edit.setVisible(false);
+        tab_edit.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                tab_edit.setVisible(false);
+                tab_label.setVisible(true);
+                tab_label.setText(tab_edit.getText());
+            }
+        });
+        tab_label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e){
+                if(e.getClickCount() == 2){
+                    tab_label.setVisible(false);
+                    tab_edit.setText(tab_label.getText());
+                    tab_edit.setVisible(true);
+                }
+            }
+        });
+        */
+        tab_label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));        
+        
         tab_header.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
         tab_header.setOpaque(false);
         tab_header.add(tab_label);
+        //tab_header.add(tab_edit);
         tab_label.setFocusable(false);
         tab_header.setFocusable(false);
         tab_header.setBorder(null);
         tab_header.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        tab_header.add(tabCloseButton);
+        tab_header.add(tabCloseButton);        
     }
     public void close(){
         sqlTab.remove(getSqlTab());

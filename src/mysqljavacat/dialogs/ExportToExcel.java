@@ -16,7 +16,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableModel;
@@ -66,7 +65,7 @@ public class ExportToExcel extends javax.swing.JDialog {
                                     +"xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n"
                                     +"xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n"
                                     +"xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n"
-                                    + "<Worksheet ss:Name=\"Sheet1\">\n"
+                                    +"<Worksheet ss:Name=\"Sheet1\">\n"
                                     +"<ss:Table>\n";
                                 JTable table = view.getResultTable();
                                 TableModel model  = table.getModel();

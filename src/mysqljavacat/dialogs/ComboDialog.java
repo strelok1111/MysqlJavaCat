@@ -18,11 +18,13 @@ import mysqljavacat.renders.ComboCompleteRender;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JEditorPane;
 import javax.swing.JList;
 import mysqljavacat.MysqlJavaCatApp;
 import mysqljavacat.MysqlJavaCatView;
+import mysqljavacat.databaseobjects.CompleteObj;
 import mysqljavacat.databaseobjects.TableObj;
 
 /**
@@ -80,12 +82,28 @@ public class ComboDialog extends javax.swing.JDialog {
             }
         }
     }
+    public ArrayList<Object> getQueryAliases(DatabaseObj db){
+        ArrayList<Object> out = new ArrayList<Object>();
+        Pattern pat = Pattern.compile("\\s(\\w+)\\s+AS\\s+(\\w+)\\s",Pattern.CASE_INSENSITIVE);
+        Matcher m = pat.matcher(edit.getText());
+        while(m.find()){
+            String table = m.group(1);
+            if(db.getTable(table) != null){
+                out.add(db.getTable(table).createAlias(m.group(2)));
+            }
+        }
+        return out;
+    }
+
     public ArrayList<Object> getQueryTables(DatabaseObj db){
         ArrayList<Object> out = new ArrayList<Object>();
+        HashMap<String,Boolean> det = new HashMap<String,Boolean>();
         String [] words = edit.getText().split("\\s+");
         for(String s : words)
-            if(db.getTable(s) != null)
+            if(db.getTable(s) != null && det.get(s) == null){
                 out.add(db.getTable(s));
+                det.put(s,true);
+            }        
         return out;
     }
     public ArrayList<Object> getCoplList(String input){
@@ -95,6 +113,12 @@ public class ComboDialog extends javax.swing.JDialog {
         DatabaseObj cur_db = main_frame.getSelectedDb();
         String [] parts = input.split("\\.");
         ArrayList<Object> query_tables = getQueryTables(cur_db);
+        ArrayList<Object> query_aliases = getQueryAliases(cur_db);
+        HashMap<String,TableObj> alias_hash = new HashMap<String,TableObj>();
+        for(Object alias : query_aliases){
+            query_tables.add(alias);
+            alias_hash.put(((TableObj)alias).getName(), (TableObj)alias);
+        }
         if(input.length() == 0){            
             FilterAddList(out,new ArrayList<Object>(cur_db.getTables()),null);
             if(!query_tables.isEmpty()){
@@ -116,25 +140,31 @@ public class ComboDialog extends javax.swing.JDialog {
             }
             if(query_tables.size() == 1){
                 FilterAddList(out,new ArrayList<Object>(((TableObj)query_tables.get(0)).getFields()),parts[0],false);
-
             }
             FilterAddList(out,new ArrayList<Object>(FuncObj.getFucList()),parts[0]);
             FilterAddList(out,new ArrayList<Object>(db_map.values()),parts[0]);
         }else if(parts.length == 1 && input.endsWith(".")){            
-            if(cur_db.getTable(parts[0]) != null)
+            if(alias_hash.get(parts[0]) != null){
+                FilterAddList(out,new ArrayList<Object>(alias_hash.get(parts[0]).getFields()),null);
+            } else if (cur_db.getTable(parts[0]) != null){
                 FilterAddList(out,new ArrayList<Object>(cur_db.getTable(parts[0]).getFields()),null);
+            }
             if(db_map.get(parts[0]) != null)
                 FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),null);
         }else if(parts.length == 2 && !input.endsWith(".")){
-            if(cur_db.getTable(parts[0]) != null)
+            if(alias_hash.get(parts[0]) != null)
+                FilterAddList(out,new ArrayList<Object>(alias_hash.get(parts[0]).getFields()),parts[1]);
+            else if(cur_db.getTable(parts[0]) != null)
                 FilterAddList(out,new ArrayList<Object>(cur_db.getTable(parts[0]).getFields()),parts[1]);
             if(db_map.get(parts[0]) != null)
                 FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTables()),parts[1]);
         }else if(parts.length == 2 && input.endsWith(".")){
             if(db_map.get(parts[0]) != null && db_map.get(parts[0]).getTable(parts[1]) != null)
+                db_map.get(parts[0]).getTable(parts[1]).refereshTable();
                 FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTable(parts[1]).getFields()),null);
         }else if(parts.length == 3 && !input.endsWith(".")){
             if(db_map.get(parts[0]) != null && db_map.get(parts[0]).getTable(parts[1]) != null)
+                db_map.get(parts[0]).getTable(parts[1]).refereshTable();
                 FilterAddList(out,new ArrayList<Object>(db_map.get(parts[0]).getTable(parts[1]).getFields()),parts[2]);
         }
 
@@ -170,24 +200,25 @@ public class ComboDialog extends javax.swing.JDialog {
         String textout = "";
         String before_caret = textinput.substring(0,edit.getCaretPosition());
         String after_caret = "";
+        String text_in = ((CompleteObj)jList1.getSelectedValue()).getName();
         if(textinput.length() > edit.getCaretPosition()){
             after_caret = textinput.substring(edit.getCaretPosition(),textinput.length());
         }
         String [] parts = compl_string.split("\\.");
         if(compl_string.endsWith(".") || compl_string.equals("")){
-            textout = before_caret + jList1.getSelectedValue().toString() + after_caret;
+            textout = before_caret + text_in + after_caret;
             edit.setText(textout.replace("\n", "\r\n"));
-            edit.setCaretPosition((before_caret + jList1.getSelectedValue().toString()).length());
+            edit.setCaretPosition((before_caret + text_in).length());
         }else if(!compl_string.endsWith(".") && parts.length > 0){
             int before_pos = before_caret.length() - parts[parts.length - 1].length();
             if(before_pos > 0){
                 before_caret = before_caret.substring(0,before_pos);
             }else{
                 before_caret = "";
-            }
-            textout = before_caret + jList1.getSelectedValue().toString() + after_caret;
+            }            
+            textout = before_caret + text_in + after_caret;
             edit.setText(textout.replace("\n", "\r\n"));
-            edit.setCaretPosition((before_caret + jList1.getSelectedValue().toString()).length());
+            edit.setCaretPosition((before_caret + text_in).length());
         }
         
     }

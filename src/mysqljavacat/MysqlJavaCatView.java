@@ -18,6 +18,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -94,6 +95,7 @@ public class MysqlJavaCatView extends FrameView {
         getFrame().setTitle("Mysql Java Based Object Browser");
         getFrame().setIconImage(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/databases.png")).getImage());
         tabs = new SqlTabbedPane();
+        tabs.setFocusable(false);
         tabs.setName("sqlTabs");
         horisontalSplit.setLeftComponent(tabs);
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
@@ -131,7 +133,7 @@ public class MysqlJavaCatView extends FrameView {
         propText.setEnabled(true);
         MouseAdapter ma = new MouseAdapter() {
             private void addDefSelect(String table){
-                SqlTab tab = tabs.createTab(table + ".sql");
+                SqlTab tab = tabs.createTab(table);
                 String query =
                         "SELECT\n"+
                         "\t*\n"+
@@ -821,7 +823,13 @@ public class MysqlJavaCatView extends FrameView {
                     while(r1.next()){                        
                         Object [] arr = new Object[col_count];
                         for(int i = 1; i <= col_count ; i = i + 1){
-                            arr[i-1] = r1.getObject(i);
+                            Object obj = null;
+                            try{
+                                obj = r1.getObject(i);
+                            }catch(SQLException e){
+                                obj = "0000-00-00";
+                            }
+                            arr[i-1] = obj;
                         }
                         defaultColumnModel.addRow(arr);
                         size = size + 1;
@@ -896,8 +904,12 @@ public class MysqlJavaCatView extends FrameView {
                     DatabaseTree.setEnabled(false);
                     selected_db.refreshDatabase(true,false);
                     DatabaseTree.setEnabled(true);
-                    DatabaseTree.updateUI();
-                    DatabaseTree.repaint();
+                    try{
+                        DatabaseTree.updateUI();
+                        DatabaseTree.repaint();
+                    }catch(NullPointerException ex){
+                        //TODO!!!!
+                    }
                     return null;
                 }
             };

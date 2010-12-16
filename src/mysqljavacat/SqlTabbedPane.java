@@ -76,7 +76,7 @@ public class SqlTabbedPane extends JTabbedPane {
         SqlTab tab = new SqlTab();
         String new_name = castName(name,true);
         tab.setFilename(new_name);
-        tab.setTabLabel(new_name);
+        tab.setTabLabel(new_name.replaceAll(".sql", ""));
         tab.setSqlTab(this);
         add(tab);
         setTabComponentAt(this.getTabCount() - 1, tab.getTabHeader());
