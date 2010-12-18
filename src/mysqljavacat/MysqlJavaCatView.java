@@ -45,6 +45,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import jsyntaxpane.DefaultSyntaxKit;
 import mysqljavacat.dialogs.ExportToExcel;
+import mysqljavacat.dialogs.OpenDialog;
+import mysqljavacat.dialogs.SaveDialod;
 import org.jdesktop.application.Task;
 
 /**
@@ -101,7 +103,7 @@ public class MysqlJavaCatView extends FrameView {
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
             public boolean dispatchKeyEvent(KeyEvent e) {
                 if(e.getID() == KeyEvent.KEY_PRESSED){
-                    if(e.getKeyCode() == 84 && e.isControlDown()){
+                    if(e.getKeyCode() == 84 && e.isControlDown()) {
                         tabs.createTab();
                     }else if(e.getKeyCode() == 87 && e.isControlDown()){
                         tabs.getSelectedtab().close();
@@ -387,6 +389,9 @@ public class MysqlJavaCatView extends FrameView {
         DatabaseTree = new javax.swing.JTree();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
+        saveMenu = new javax.swing.JMenuItem();
+        saveAsMenu = new javax.swing.JMenuItem();
+        openMenu = new javax.swing.JMenuItem();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -483,6 +488,7 @@ public class MysqlJavaCatView extends FrameView {
         jButton1.setIcon(resourceMap.getIcon("jButton1.icon")); // NOI18N
         jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
         jButton1.setToolTipText(resourceMap.getString("jButton1.toolTipText")); // NOI18N
+        jButton1.setEnabled(false);
         jButton1.setFocusable(false);
         jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton1.setName("jButton1"); // NOI18N
@@ -649,6 +655,39 @@ public class MysqlJavaCatView extends FrameView {
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
 
+        saveMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        saveMenu.setIcon(resourceMap.getIcon("saveMenu.icon")); // NOI18N
+        saveMenu.setText(resourceMap.getString("saveMenu.text")); // NOI18N
+        saveMenu.setName("saveMenu"); // NOI18N
+        saveMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveMenuActionPerformed(evt);
+            }
+        });
+        fileMenu.add(saveMenu);
+
+        saveAsMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
+        saveAsMenu.setIcon(resourceMap.getIcon("saveAsMenu.icon")); // NOI18N
+        saveAsMenu.setText(resourceMap.getString("saveAsMenu.text")); // NOI18N
+        saveAsMenu.setName("saveAsMenu"); // NOI18N
+        saveAsMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveAsMenuActionPerformed(evt);
+            }
+        });
+        fileMenu.add(saveAsMenu);
+
+        openMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        openMenu.setIcon(resourceMap.getIcon("openMenu.icon")); // NOI18N
+        openMenu.setText(resourceMap.getString("openMenu.text")); // NOI18N
+        openMenu.setName("openMenu"); // NOI18N
+        openMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openMenuActionPerformed(evt);
+            }
+        });
+        fileMenu.add(openMenu);
+
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(mysqljavacat.MysqlJavaCatApp.class).getContext().getActionMap(MysqlJavaCatView.class, this);
         exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
         exitMenuItem.setIcon(resourceMap.getIcon("exitMenuItem.icon")); // NOI18N
@@ -786,6 +825,7 @@ public class MysqlJavaCatView extends FrameView {
             protected Object doInBackground() throws Exception {
                 closeGui();
                 SqlTab tab =  tabs.getSelectedtab();
+                tab.save();
                 Object res = null;
                 if(application.getConnection() == null || tab.getEditPane().getText().isEmpty()){
                     return res;
@@ -904,12 +944,7 @@ public class MysqlJavaCatView extends FrameView {
                     DatabaseTree.setEnabled(false);
                     selected_db.refreshDatabase(true,false);
                     DatabaseTree.setEnabled(true);
-                    try{
-                        DatabaseTree.updateUI();
-                        DatabaseTree.repaint();
-                    }catch(NullPointerException ex){
-                        //TODO!!!!
-                    }
+                    DatabaseTree.updateUI();
                     return null;
                 }
             };
@@ -948,6 +983,7 @@ public class MysqlJavaCatView extends FrameView {
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        /*
         int response;
         response = JOptionPane.showConfirmDialog(null, "Close all tabs?","",JOptionPane.OK_CANCEL_OPTION);
         if(response == JOptionPane.YES_OPTION){
@@ -958,8 +994,32 @@ public class MysqlJavaCatView extends FrameView {
             tabs.getSelectedtab().setFilename("Untitled.sql");
             tabs.getSelectedtab().setTabLabel("Untitled.sql");
         }
+         * 
+         */
 
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void saveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuActionPerformed
+        if(!tabs.getSelectedtab().isSaved() && !tabs.getSelectedtab().getFile().exists()){
+            SaveDialod dialog = new SaveDialod(this.getFrame(), true);
+            dialog.setVisible(true);
+        } else {
+            tabs.getSelectedtab().save();
+        }
+    }//GEN-LAST:event_saveMenuActionPerformed
+
+    public void proxiSaveAction(){
+        saveMenuActionPerformed(null);
+    }
+    private void saveAsMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAsMenuActionPerformed
+        SaveDialod dialog = new SaveDialod(this.getFrame(), true);
+        dialog.setVisible(true);
+    }//GEN-LAST:event_saveAsMenuActionPerformed
+
+    private void openMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openMenuActionPerformed
+        OpenDialog dialog = new OpenDialog(this.getFrame(), true);
+        dialog.setVisible(true);
+    }//GEN-LAST:event_openMenuActionPerformed
 
     public void proxyRunConnect(){
         connectButtonActionPerformed(null);
@@ -1027,11 +1087,14 @@ public class MysqlJavaCatView extends FrameView {
     private javax.swing.JToolBar jToolBar3;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem openMenu;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JEditorPane propText;
     private javax.swing.JLabel requestTime;
     private javax.swing.JTable resultTable;
     private javax.swing.JLabel rowCount;
+    private javax.swing.JMenuItem saveAsMenu;
+    private javax.swing.JMenuItem saveMenu;
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;

@@ -5,8 +5,12 @@
 
 package mysqljavacat;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mysqljavacat.dialogs.ComboDialog;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -36,7 +40,6 @@ import javax.swing.table.DefaultTableModel;
  * @author strelok
  */
 public class SqlTab extends JScrollPane{
-    private String file_name;
     private JLabel tab_label;
     private JEditorPane editor;
     private JPanel tab_header;
@@ -45,9 +48,34 @@ public class SqlTab extends JScrollPane{
     private DefaultTableModel result_col_model;
     private Long request_time;
     private Integer row_count;
+    private File file;
+    private Font notsavedfont = new Font("Arial",Font.BOLD | Font.ITALIC,12);
+    private Font savedfont = new Font("Arial",Font.PLAIN,12);
+    private boolean saved = false;
+    private boolean external = false;
 
     public void setResultColModel(DefaultTableModel model){
         result_col_model = model;
+    }
+
+    public void setIsExternal(boolean s){
+        external = s;
+    }
+    public boolean isExternal(){
+        return external;
+    }
+    public boolean isSaved(){
+        return saved;
+    }
+    public void save(){
+        try {
+            file.createNewFile();
+            MysqlJavaCatApp.getApplication().saveToFile(editor.getText(), file);
+            saved = true;
+            tab_label.setFont(savedfont);
+        } catch (IOException ex) {
+            Logger.getLogger(SqlTab.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     public DefaultTableModel getResultColModel(){
         return result_col_model;
@@ -64,8 +92,6 @@ public class SqlTab extends JScrollPane{
     public Integer getRowCount(){
         return row_count;
     }
-
-
     public void setSqlTab(SqlTabbedPane s){
         sqlTab = s;
     }
@@ -75,11 +101,12 @@ public class SqlTab extends JScrollPane{
     public ComboDialog getComboDialog(){
         return combo_dialog;
     }
-    public SqlTab() {        
+    public SqlTab(File file_in) {
         editor = new JEditorPane();
+        file = file_in;        
         this.setBorder(null);
         this.setViewportView(editor);
-        editor.setContentType("text/sql");
+        editor.setContentType("text/sql");        
         combo_dialog = new ComboDialog(editor);
         editor.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
@@ -176,7 +203,10 @@ public class SqlTab extends JScrollPane{
             }
 
             public void keyTyped(KeyEvent e) {
-
+                if(e.getKeyCode() != 83 && !e.isControlDown()){
+                    saved = false;
+                    tab_label.setFont(notsavedfont);
+                }
             }
 
             public void keyReleased(KeyEvent e) {
@@ -229,17 +259,29 @@ public class SqlTab extends JScrollPane{
         tab_header.setFocusable(false);
         tab_header.setBorder(null);
         tab_header.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        tab_header.add(tabCloseButton);        
+        tab_header.add(tabCloseButton);
+        if(file.exists()){
+            saved = true;
+            editor.setText(MysqlJavaCatApp.getApplication().readFromFile(file));
+            tab_label.setFont(savedfont);
+        }else{
+            tab_label.setFont(notsavedfont);
+        }
     }
     public void close(){
         sqlTab.remove(getSqlTab());
-        MysqlJavaCatApp.getApplication().deleteFile(new File("current",file_name));
+        if(!external){
+            MysqlJavaCatApp.getApplication().deleteFile(file);
+        }
     }
-    public String getFilename(){
-        return file_name;
+    public File getFile(){
+        return file;
     }
-    public void setFilename(String s){
-        file_name = s;
+    public void setFileSave(File f){
+        file = f;
+        save();
+        tab_label.setFont(savedfont);
+        tab_label.setText(file.getName().replace(".sql", ""));
     }
     public JEditorPane getEditPane(){
         return editor;

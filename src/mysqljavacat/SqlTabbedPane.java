@@ -2,8 +2,11 @@ package mysqljavacat;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JEditorPane;
@@ -13,6 +16,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+import sun.misc.BASE64Decoder;
 
 /**
  *
@@ -20,30 +24,38 @@ import javax.swing.table.TableColumnModel;
  */
 public class SqlTabbedPane extends JTabbedPane {
     public SqlTabbedPane() {
-        if ((new File("current")).exists()) {
+        String open_tabs = MysqlJavaCatApp.getApplication().getProperties().getProperty("openedTabs","");
+        String [] files = open_tabs.split("\\|");
+        boolean added = false;
+        if(files.length != 0){
+            BASE64Decoder dec = new BASE64Decoder();
+            for(String f : files){
+                if(!f.isEmpty()){
+
+                    try {
+                        String file_name = new String(dec.decodeBuffer(f));
+                        added = true;
+                        createTab(new File(file_name),!new File(file_name).getParentFile().getPath().equals(new File("current").getAbsolutePath()));
+                    } catch (IOException ex) {
+                        Logger.getLogger(SqlTabbedPane.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }else{
             File dir = new File("current");
             File[] children = dir.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String name) {
                     return name.endsWith(".sql");
                 }
-            });
-            if(children.length != 0){               
-                for (int i=0; i<children.length; i++) {                                       
-                    SqlTab tab = createTab(children[i].getName());
-                    tab.getEditPane().setText(MysqlJavaCatApp.getApplication().readFromFile(children[i]));
-                }
-            }else{
-                createTab();
+            });           
+            for (File f : children) {
+                createTab(f,false);
+                added = true;
             }
-
-        } else {
-            (new File("current")).mkdir();
+        }
+        if(!added)
             createTab();
-        }
-
-        if (!(new File("closed")).exists()) {
-            (new File("closed")).mkdir();
-        }
+        
         
         addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -73,19 +85,22 @@ public class SqlTabbedPane extends JTabbedPane {
     }
 
     public SqlTab createTab(String name) {
-        SqlTab tab = new SqlTab();
         String new_name = castName(name,true);
-        tab.setFilename(new_name);
-        tab.setTabLabel(new_name.replaceAll(".sql", ""));
+        return createTab(new File("current",new_name),false);
+    }
+    public final SqlTab createTab(File f,boolean ext) {
+        SqlTab tab = new SqlTab(f);
+        tab.setTabLabel(f.getName().replaceAll(".sql", ""));
+        tab.setIsExternal(ext);
         tab.setSqlTab(this);
         add(tab);
         setTabComponentAt(this.getTabCount() - 1, tab.getTabHeader());
-        setSelectedIndex(this.getTabCount() - 1);        
+        setSelectedIndex(this.getTabCount() - 1);
         return tab;
     }
     private String castName(String in,boolean flag){
         for(SqlTab tab : getSqlTabs()){
-            if(tab.getFilename().equals(in)){
+            if(tab.getFile().getName().equals(in)){
                 String[] file = in.split("\\.");
                 if(flag){
                     return castName(file[0] + "_1.sql", false);
@@ -102,8 +117,7 @@ public class SqlTabbedPane extends JTabbedPane {
         return in;
     }
     public SqlTab createTab() {
-        SqlTab tab = createTab("Untitled.sql");
-        return tab;
+        return createTab("Untitled.sql");
     }
     public JEditorPane getCurrEditorPane(){
         return ((SqlTab)getSelectedComponent()).getEditPane();

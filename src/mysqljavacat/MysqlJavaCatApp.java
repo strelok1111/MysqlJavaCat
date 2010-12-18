@@ -29,6 +29,8 @@ import java.util.Properties;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import mysqljavacat.dialogs.ConfigDialog;
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 /**
  * The main class of the application.
@@ -65,7 +67,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     public String readFromFile(File file){
         String outline = null;
         try {
-            FileReader input = new FileReader(file.getPath());
+            FileReader input = new FileReader(file);
             BufferedReader bufRead = new BufferedReader(input);
             outline = "";
             try {
@@ -217,12 +219,27 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             showError(e.getMessage());
         }
     }
+     public void saveTabs(){
+        String opened = "";
+        BASE64Encoder enc = new BASE64Encoder();
+        for(SqlTab tab : view.getTabsMain().getSqlTabs()){
+            tab.save();
+            opened = opened + enc.encode(tab.getFile().getAbsolutePath().getBytes()) + "|";
+        }
+        prop.setProperty("openedTabs", opened);        
+     }
     /**
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {        
         if (!(new File("connections")).exists()) {
             (new File("connections")).mkdir();
+        }
+        if (!(new File("closed")).exists()) {
+            (new File("closed")).mkdir();
+        }
+        if (!(new File("current")).exists()) {
+            (new File("current")).mkdir();
         }
         loadProp();        
         view = new MysqlJavaCatView(this);
@@ -238,10 +255,8 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
 
         @Override
         public void windowClosing(WindowEvent e) {
-                for(SqlTab tab : view.getTabsMain().getSqlTabs()){
-                    File f = new File("current",tab.getFilename());
-                    saveToFile(tab.getEditPane().getText(), f);
-                }
+               saveTabs();
+               saveProp();
         }
 
     });
