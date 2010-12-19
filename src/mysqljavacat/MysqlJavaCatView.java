@@ -944,7 +944,7 @@ public class MysqlJavaCatView extends FrameView {
                     DatabaseTree.setEnabled(false);
                     selected_db.refreshDatabase(true,false);
                     DatabaseTree.setEnabled(true);
-                    DatabaseTree.updateUI();
+                    ((DefaultTreeModel)DatabaseTree.getModel()).reload((DefaultMutableTreeNode)DatabaseTree.getModel().getRoot());
                     return null;
                 }
             };
