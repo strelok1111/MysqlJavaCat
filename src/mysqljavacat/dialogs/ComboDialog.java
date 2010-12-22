@@ -36,7 +36,6 @@ public class ComboDialog extends javax.swing.JDialog {
     /** Creates new form ComboDialog */
     private JEditorPane edit;
     private boolean prepared = false;
-    private String compl_string;
 
     public boolean getPrepared(){
         return prepared;
@@ -184,7 +183,6 @@ public class ComboDialog extends javax.swing.JDialog {
             this.setVisible(true);
             jList1.setSelectedIndex(0);
             jList1.ensureIndexIsVisible(0);
-            compl_string = s;
         }else{
             this.setVisible(false);
         }

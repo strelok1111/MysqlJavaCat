@@ -1,5 +1,7 @@
 package mysqljavacat;
 
+import com.mysql.jdbc.StringUtils;
+import java.awt.Component;
 import mysqljavacat.dialogs.MysqlJavaCatAboutBox;
 import mysqljavacat.databaseobjects.DatabaseObj;
 import mysqljavacat.databaseobjects.TableObj;
@@ -7,6 +9,10 @@ import mysqljavacat.renders.ColoredTableCellRenderer;
 import mysqljavacat.renders.DatabaseTreeCellRender;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -25,6 +31,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -133,6 +140,136 @@ public class MysqlJavaCatView extends FrameView {
         propText.setContentType("text/sql");
         propText.setEditable(false);
         propText.setEnabled(true);
+        MouseAdapter table_ma = new MouseAdapter() {
+            private String getValue(JTable table,int row,int col){
+                if(table.getValueAt(row, col) == null){
+                    return "";
+                }else
+                    return table.getValueAt(row, col).toString();
+            }
+            private void myPopupEvent(MouseEvent e) {
+                    int x = e.getX();
+                    int y = e.getY();
+                    final JTable table = (JTable) e.getSource();
+                    final int row = table.rowAtPoint(new Point(x, y));
+                    final int col = table.columnAtPoint(new Point(x, y));
+                    if(table.getSelectedRowCount() <= 1){
+                        DefaultListSelectionModel sel_model = new DefaultListSelectionModel();
+                        sel_model.setSelectionInterval(row, row);
+                        table.setSelectionModel(sel_model);
+                    }
+                    JPopupMenu popup = new JPopupMenu();
+                    JMenuItem menu_item = new JMenuItem();
+                    menu_item.setText("Copy cell data to clipboard");
+                    menu_item.setIcon(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/page_copy.png")));
+                    menu_item.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                            StringSelection stringSelection = new StringSelection(getValue(table,row, col));
+                            clipboard.setContents(stringSelection, null);
+                        }
+                    });
+                    popup.add(menu_item);
+                    JMenuItem menu_item1 = new JMenuItem();
+                    menu_item1.setText("Copy all data to clipboard");
+                    menu_item1.setIcon(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/page_copy.png")));
+                    menu_item1.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                            String out = "";
+                            boolean first_row = true;
+                            for(int i = 0;i < table.getRowCount();i = i + 1){
+                                String row = "";
+                                boolean first_col = true;
+                                for(int k = 0; k < table.getColumnCount();k = k + 1){
+                                    if(first_col){
+                                        row += getValue(table,i, k);
+                                        first_col = false;
+                                    }else{
+                                        row += "\t" + getValue(table,i, k);
+                                    }
+                                }
+                                if(first_row){
+                                    out += row;
+                                    first_row = false;
+                                }else{
+                                    out += "\n" + row;
+                                }
+                            }
+                            StringSelection stringSelection = new StringSelection(out);
+                            clipboard.setContents(stringSelection, null);
+                        }
+                    });
+                    popup.add(menu_item1);
+
+                    JMenuItem menu_item2 = new JMenuItem();
+                    menu_item2.setText("Copy column data to clipboard");
+                    menu_item2.setIcon(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/page_copy.png")));
+                    menu_item2.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                            String out = "";
+                            boolean first_row = true;
+                            for(int i = 0;i < table.getRowCount();i = i + 1){                               
+                                if(first_row){
+                                    out += getValue(table, i, col);
+                                    first_row = false;
+                                }else{
+                                    out += "\n" + getValue(table, i, col);
+                                }
+                            }
+                            StringSelection stringSelection = new StringSelection(out);
+                            clipboard.setContents(stringSelection, null);
+                        }
+                    });
+                    popup.add(menu_item2);
+                    JMenuItem menu_item3 = new JMenuItem();
+                    menu_item3.setText("Copy row data to clipboard");
+                    menu_item3.setIcon(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/page_copy.png")));
+                    menu_item3.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                            String out = "";
+                            boolean first_row = true;
+                            for(int i : table.getSelectedRows()){
+                                String row = "";
+                                boolean first_col = true;
+                                for(int k = 0; k < table.getColumnCount();k = k + 1){
+                                    if(first_col){
+                                        row += getValue(table,i, k);
+                                        first_col = false;
+                                    }else{
+                                        row += "\t" + getValue(table,i, k);
+                                    }
+                                }
+                                if(first_row){
+                                    out += row;
+                                    first_row = false;
+                                }else{
+                                    out += "\n" + row;
+                                }
+                            }
+                            StringSelection stringSelection = new StringSelection(out);
+                            clipboard.setContents(stringSelection, null);
+                        }
+                    });
+                    popup.add(menu_item3);
+
+                    popup.show(table, x, y);
+                    return;
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                    if (e.isPopupTrigger()) myPopupEvent(e);
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                    if (e.isPopupTrigger()) myPopupEvent(e);
+            }
+
+        };
+        
+        resultTable.addMouseListener(table_ma);
         MouseAdapter ma = new MouseAdapter() {
             private void addDefSelect(String table){
                 SqlTab tab = tabs.createTab(table);
