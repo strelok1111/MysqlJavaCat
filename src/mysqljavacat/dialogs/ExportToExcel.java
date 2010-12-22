@@ -1,9 +1,4 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * ExportToExcel.java
  *
  * Created on Dec 13, 2010, 1:28:25 PM
@@ -59,43 +54,47 @@ public class ExportToExcel extends javax.swing.JDialog {
                             PrintWriter fw = null;
                             try {
                                 fw = new PrintWriter(jFileChooser1.getSelectedFile());
-                                String out = "<?xml version=\"1.0\"?>\n"
+                                StringBuffer out = new StringBuffer("<?xml version=\"1.0\"?>\n"
                                     +"<?mso-application progid=\"Excel.Sheet\"?>\n"
                                     +"<Workbook\n"
                                     +"xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n"
                                     +"xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n"
                                     +"xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n"
                                     +"<Worksheet ss:Name=\"Sheet1\">\n"
-                                    +"<ss:Table>\n";
+                                    +"<ss:Table>\n");
                                 JTable table = view.getResultTable();
                                 TableModel model  = table.getModel();
-                                out = out + "<ss:Row>\n";
+                                out.append("<ss:Row>\n");
                                 for(int col = 1;col <= model.getColumnCount();col = col + 1){
-                                     out = out + "<ss:Cell><Data ss:Type=\"String\">" + model.getColumnName(col) + "</Data></ss:Cell>\n";
+                                     out.append("<ss:Cell><Data ss:Type=\"String\">");
+                                     out.append(model.getColumnName(col));
+                                     out.append("</Data></ss:Cell>\n");
                                 }
-                                out = out + "</ss:Row>\n";
-                                fw.write(out);
+                                out.append("</ss:Row>\n");
+                                fw.write(out.toString());
                                 dialog.dispose();
-                                out = "";
+                                out = new StringBuffer();
                                 int buffer = 0;
                                 for(int row = 0;row < model.getRowCount();row = row + 1){
-                                     out = out + "<ss:Row>\n";
+                                     out.append("<ss:Row>\n");
                                      for(int col = 0;col < model.getColumnCount();col = col + 1){
-                                         out = out + "<ss:Cell><Data ss:Type=\"String\">" + model.getValueAt(row, col) + "</Data></ss:Cell>\n";
+                                         out.append("<ss:Cell><Data ss:Type=\"String\">");
+                                         out.append(model.getValueAt(row, col));
+                                         out.append("</Data></ss:Cell>\n");
                                      }
-                                     out = out + "</ss:Row>\n";
-                                     if(buffer >= 1000){
-                                        fw.write(out);
+                                     out.append("</ss:Row>\n");
+                                     if(buffer >= 10000){
+                                        fw.write(out.toString());
                                         buffer = 0;
-                                        out = "";
+                                        out = new StringBuffer();
                                      }
                                      buffer = buffer + 1;
                                      setMessage("Exported: " + row);
                                 }
-                                out = out + "</Table>\n"
+                                out.append("</Table>\n"
                                     + "</Worksheet>\n"
-                                    + "</Workbook>\n";
-                                fw.write(out);
+                                    + "</Workbook>\n");
+                                fw.write(out.toString());
                                 fw.close();
                             } catch (IOException ex) {
                                 MysqlJavaCatApp.getApplication().showError(ex.getMessage());

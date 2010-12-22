@@ -176,27 +176,29 @@ public class MysqlJavaCatView extends FrameView {
                     menu_item1.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                            String out = "";
+                            StringBuilder out = new StringBuilder();
                             boolean first_row = true;
                             for(int i = 0;i < table.getRowCount();i = i + 1){
-                                String row = "";
+                                StringBuffer row = new StringBuffer();
                                 boolean first_col = true;
                                 for(int k = 0; k < table.getColumnCount();k = k + 1){
                                     if(first_col){
-                                        row += getValue(table,i, k);
+                                        row.append(getValue(table,i, k));
                                         first_col = false;
                                     }else{
-                                        row += "\t" + getValue(table,i, k);
+                                        row.append("\t");
+                                        row.append(getValue(table,i, k));
                                     }
                                 }
                                 if(first_row){
-                                    out += row;
+                                    out.append(row);
                                     first_row = false;
                                 }else{
-                                    out += "\n" + row;
+                                    out.append("\n");
+                                    out.append(row);
                                 }
                             }
-                            StringSelection stringSelection = new StringSelection(out);
+                            StringSelection stringSelection = new StringSelection(out.toString());
                             clipboard.setContents(stringSelection, null);
                         }
                     });
@@ -208,17 +210,18 @@ public class MysqlJavaCatView extends FrameView {
                     menu_item2.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                            String out = "";
+                            StringBuilder out = new StringBuilder();
                             boolean first_row = true;
                             for(int i = 0;i < table.getRowCount();i = i + 1){                               
                                 if(first_row){
-                                    out += getValue(table, i, col);
+                                    out.append(getValue(table, i, col));
                                     first_row = false;
                                 }else{
-                                    out += "\n" + getValue(table, i, col);
+                                    out.append("\n");
+                                    out.append(getValue(table, i, col));
                                 }
                             }
-                            StringSelection stringSelection = new StringSelection(out);
+                            StringSelection stringSelection = new StringSelection(out.toString());
                             clipboard.setContents(stringSelection, null);
                         }
                     });
@@ -229,27 +232,29 @@ public class MysqlJavaCatView extends FrameView {
                     menu_item3.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                            String out = "";
+                            StringBuilder out = new StringBuilder();
                             boolean first_row = true;
-                            for(int i : table.getSelectedRows()){
-                                String row = "";
+                            for(int i:table.getSelectedRows()){
+                                StringBuffer row = new StringBuffer();
                                 boolean first_col = true;
                                 for(int k = 0; k < table.getColumnCount();k = k + 1){
                                     if(first_col){
-                                        row += getValue(table,i, k);
+                                        row.append(getValue(table,i, k));
                                         first_col = false;
                                     }else{
-                                        row += "\t" + getValue(table,i, k);
+                                        row.append("\t");
+                                        row.append(getValue(table,i, k));
                                     }
                                 }
                                 if(first_row){
-                                    out += row;
+                                    out.append(row);
                                     first_row = false;
                                 }else{
-                                    out += "\n" + row;
+                                    out.append("\n");
+                                    out.append(row);
                                 }
                             }
-                            StringSelection stringSelection = new StringSelection(out);
+                            StringSelection stringSelection = new StringSelection(out.toString());
                             clipboard.setContents(stringSelection, null);
                         }
                     });

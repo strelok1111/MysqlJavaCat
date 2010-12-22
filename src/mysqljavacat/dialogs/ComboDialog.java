@@ -196,7 +196,7 @@ public class ComboDialog extends javax.swing.JDialog {
         hideVithPrepared();
         String before_caret = edit.getText().replace("\\r\\n", "\\n").substring(0, edit.getCaretPosition());
         String text_in = ((CompleteObj)jList1.getSelectedValue()).getName();
-        Matcher m = Pattern.compile("([.\\w]+)\\z").matcher(before_caret);
+        Matcher m = Pattern.compile("([\\w]+)\\z").matcher(before_caret);
         if(m.find()){
             edit.setSelectionStart(edit.getCaretPosition() - m.group(1).length());
             edit.setSelectionEnd(edit.getCaretPosition());
