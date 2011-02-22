@@ -78,9 +78,9 @@ public class ExportToExcel extends javax.swing.JDialog {
                                 for(int row = 0;row < model.getRowCount();row = row + 1){
                                      out.append("<ss:Row>\n");
                                      for(int col = 0;col < model.getColumnCount();col = col + 1){
-                                         out.append("<ss:Cell><Data ss:Type=\"String\">");
+                                         out.append("<ss:Cell><ss:Data ss:Type=\"String\">");
                                          out.append(model.getValueAt(row, col));
-                                         out.append("</Data></ss:Cell>\n");
+                                         out.append("</ss:Data></ss:Cell>\n");
                                      }
                                      out.append("</ss:Row>\n");
                                      if(buffer >= 10000){
