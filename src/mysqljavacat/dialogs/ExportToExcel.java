@@ -59,30 +59,31 @@ public class ExportToExcel extends javax.swing.JDialog {
                                     +"<Workbook\n"
                                     +"xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n"
                                     +"xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n"
+                                    +"xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n"
                                     +"xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n"
                                     +"<Worksheet ss:Name=\"Sheet1\">\n"
-                                    +"<ss:Table>\n");
+                                    +"<Table>\n");
                                 JTable table = view.getResultTable();
                                 TableModel model  = table.getModel();
-                                out.append("<ss:Row>\n");
+                                out.append("<Row>\n");
                                 for(int col = 1;col <= model.getColumnCount();col = col + 1){
-                                     out.append("<ss:Cell><ss:Data ss:Type=\"String\">");
+                                     out.append("<Cell><Data ss:Type=\"String\">");
                                      out.append(model.getColumnName(col));
-                                     out.append("</ss:Data></ss:Cell>\n");
+                                     out.append("</Data></Cell>\n");
                                 }
-                                out.append("</ss:Row>\n");
+                                out.append("</Row>\n");
                                 fw.write(out.toString());
                                 dialog.dispose();
                                 out = new StringBuffer();
                                 int buffer = 0;
                                 for(int row = 0;row < model.getRowCount();row = row + 1){
-                                     out.append("<ss:Row>\n");
+                                     out.append("<Row>\n");
                                      for(int col = 0;col < model.getColumnCount();col = col + 1){
-                                         out.append("<ss:Cell><ss:Data ss:Type=\"String\">");
+                                         out.append("<Cell><Data ss:Type=\"String\">");
                                          out.append(model.getValueAt(row, col));
-                                         out.append("</ss:Data></ss:Cell>\n");
+                                         out.append("</Data></Cell>\n");
                                      }
-                                     out.append("</ss:Row>\n");
+                                     out.append("</Row>\n");
                                      if(buffer >= 10000){
                                         fw.write(out.toString());
                                         buffer = 0;
@@ -91,7 +92,7 @@ public class ExportToExcel extends javax.swing.JDialog {
                                      buffer = buffer + 1;
                                      setMessage("Exported: " + row);
                                 }
-                                out.append("</ss:Table>\n"
+                                out.append("</Table>\n"
                                     + "</Worksheet>\n"
                                     + "</Workbook>\n");
                                 fw.write(out.toString());
