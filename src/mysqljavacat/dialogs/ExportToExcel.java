@@ -66,9 +66,9 @@ public class ExportToExcel extends javax.swing.JDialog {
                                 TableModel model  = table.getModel();
                                 out.append("<ss:Row>\n");
                                 for(int col = 1;col <= model.getColumnCount();col = col + 1){
-                                     out.append("<ss:Cell><Data ss:Type=\"String\">");
+                                     out.append("<ss:Cell><ss:Data ss:Type=\"String\">");
                                      out.append(model.getColumnName(col));
-                                     out.append("</Data></ss:Cell>\n");
+                                     out.append("</ss:Data></ss:Cell>\n");
                                 }
                                 out.append("</ss:Row>\n");
                                 fw.write(out.toString());
@@ -91,7 +91,7 @@ public class ExportToExcel extends javax.swing.JDialog {
                                      buffer = buffer + 1;
                                      setMessage("Exported: " + row);
                                 }
-                                out.append("</Table>\n"
+                                out.append("</ss:Table>\n"
                                     + "</Worksheet>\n"
                                     + "</Workbook>\n");
                                 fw.write(out.toString());
