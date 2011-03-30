@@ -8,8 +8,11 @@ package mysqljavacat.dialogs;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileFilter;
@@ -53,7 +56,7 @@ public class ExportToExcel extends javax.swing.JDialog {
                             MysqlJavaCatView view = MysqlJavaCatApp.getApplication().getView();
                             PrintWriter fw = null;
                             try {
-                                fw = new PrintWriter(jFileChooser1.getSelectedFile());
+                                fw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(jFileChooser1.getSelectedFile()),"UTF8")));
                                 StringBuffer out = new StringBuffer("<?xml version=\"1.0\"?>\n"
                                     +"<?mso-application progid=\"Excel.Sheet\"?>\n"
                                     +"<Workbook\n"
