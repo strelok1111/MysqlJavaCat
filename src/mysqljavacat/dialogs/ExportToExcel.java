@@ -32,7 +32,7 @@ public class ExportToExcel extends javax.swing.JDialog {
 
             @Override
             public boolean accept(File f) {
-                return f.getName().endsWith(".xml");
+                return f.getName().endsWith(".xml") || f.isDirectory();
             }
 
             @Override
