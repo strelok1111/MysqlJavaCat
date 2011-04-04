@@ -69,7 +69,7 @@ public class ExportToExcel extends javax.swing.JDialog {
                                 JTable table = view.getResultTable();
                                 TableModel model  = table.getModel();
                                 out.append("<Row>\n");
-                                for(int col = 1;col <= model.getColumnCount();col = col + 1){
+                                for(int col = 0;col < model.getColumnCount();col = col + 1){
                                      out.append("<Cell><Data ss:Type=\"String\">");
                                      out.append(model.getColumnName(col));
                                      out.append("</Data></Cell>\n");
