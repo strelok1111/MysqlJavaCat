@@ -32,6 +32,7 @@ public class ConfigDialog extends javax.swing.JDialog {
     
     public void saveConnectionProps(){
         cur_con.getProperties().setProperty("host", hostField.getText());
+        cur_con.getProperties().setProperty("port", portField.getText());
         cur_con.getProperties().setProperty("user", userField.getText());
         cur_con.getProperties().setProperty("password",new String(passField.getPassword()));
         cur_con.getProperties().setProperty("SSHhost", sshHost.getText());
@@ -50,6 +51,7 @@ public class ConfigDialog extends javax.swing.JDialog {
     public void loadConnectionProps(){
         cur_con.load();
         hostField.setText(cur_con.getProperties().getProperty("host"));
+        portField.setText(cur_con.getProperties().getProperty("port"));
         userField.setText(cur_con.getProperties().getProperty("user"));
         passField.setText(cur_con.getProperties().getProperty("password"));
         sshHost.setText(cur_con.getProperties().getProperty("SSHhost"));
@@ -111,6 +113,7 @@ public class ConfigDialog extends javax.swing.JDialog {
         
         userField.addKeyListener(input_listener);
         hostField.addKeyListener(input_listener);
+        portField.addKeyListener(input_listener);
         passField.addKeyListener(input_listener);
         sshHost.addKeyListener(input_listener);
         sshUser.addKeyListener(input_listener);
@@ -142,6 +145,8 @@ public class ConfigDialog extends javax.swing.JDialog {
         userField = new javax.swing.JTextField();
         passField = new javax.swing.JPasswordField();
         jLabel3 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        portField = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         useSSHTun = new javax.swing.JCheckBox();
         sshHost = new javax.swing.JTextField();
@@ -198,6 +203,11 @@ public class ConfigDialog extends javax.swing.JDialog {
         jLabel3.setText(resourceMap.getString("jLabel3.text")); // NOI18N
         jLabel3.setName("jLabel3"); // NOI18N
 
+        jLabel8.setText(resourceMap.getString("jLabel8.text")); // NOI18N
+        jLabel8.setName("jLabel8"); // NOI18N
+
+        portField.setName("portField"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -207,13 +217,15 @@ public class ConfigDialog extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel8))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(portField)
                     .addComponent(passField)
                     .addComponent(userField, javax.swing.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE)
                     .addComponent(hostField))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -230,7 +242,11 @@ public class ConfigDialog extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(passField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel8)
+                    .addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Connection", jPanel1);
@@ -278,9 +294,9 @@ public class ConfigDialog extends javax.swing.JDialog {
                             .addComponent(jLabel4))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(sshUser, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
-                            .addComponent(sshPass, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
-                            .addComponent(sshHost, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE))))
+                            .addComponent(sshUser, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
+                            .addComponent(sshPass, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
+                            .addComponent(sshHost, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -300,7 +316,7 @@ public class ConfigDialog extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(sshPass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(45, Short.MAX_VALUE))
+                .addContainerGap(61, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab(resourceMap.getString("jPanel2.TabConstraints.tabTitle"), jPanel2); // NOI18N
@@ -382,11 +398,11 @@ public class ConfigDialog extends javax.swing.JDialog {
                         .addComponent(saveCon)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(DeleteCon)
-                        .addContainerGap(198, Short.MAX_VALUE))
+                        .addContainerGap(214, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addGap(18, 18, 18)
-                        .addComponent(connectCombo, 0, 227, Short.MAX_VALUE)
+                        .addComponent(connectCombo, 0, 246, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(editConName, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())))
@@ -516,12 +532,14 @@ public class ConfigDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JButton newCon;
     private javax.swing.JButton okButton;
     private javax.swing.JPasswordField passField;
+    private javax.swing.JTextField portField;
     private javax.swing.JButton saveCon;
     private javax.swing.JTextField sshHost;
     private javax.swing.JPasswordField sshPass;

@@ -107,7 +107,8 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     public Connection setupConnection(mysqljavacat.databaseobjects.Connection con) throws SQLException,ClassNotFoundException{
         Class.forName("com.mysql.jdbc.Driver");        
         Properties propert = con.getProperties();
-        String dsn = "jdbc:mysql://" + propert.getProperty("host") + ":3306";
+        String port = propert.getProperty("port", "3306");
+        String dsn = "jdbc:mysql://" + propert.getProperty("host") + ":" + (port.equals("") ? "3306" : port);
         if(propert.getProperty("useSSH","0").equals("1")){
             dsn = dsn
             + "?socketFactory=SSHSocketFactory"
