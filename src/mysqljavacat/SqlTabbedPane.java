@@ -35,14 +35,14 @@ public class SqlTabbedPane extends JTabbedPane {
                     try {
                         String file_name = new String(dec.decodeBuffer(f));
                         added = true;
-                        createTab(new File(file_name),!new File(file_name).getParentFile().getPath().equals(new File("current").getAbsolutePath()));
+                        createTab(new File(file_name),!new File(file_name).getParentFile().getPath().equals(new File(MysqlJavaCatApp.getApplication().getInitDir() + "current").getAbsolutePath()));
                     } catch (IOException ex) {
                         Logger.getLogger(SqlTabbedPane.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
         }else{
-            File dir = new File("current");
+            File dir = new File(MysqlJavaCatApp.getApplication().getInitDir() + "current");
             File[] children = dir.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String name) {
                     return name.endsWith(".sql");
@@ -86,9 +86,9 @@ public class SqlTabbedPane extends JTabbedPane {
 
     public SqlTab createTab(String name) {
         String new_name = castName(name,true);
-        return createTab(new File("current",new_name),false);
+        return createTab(new File(MysqlJavaCatApp.getApplication().getInitDir() + "current",new_name),false);
     }
-    public final SqlTab createTab(File f,boolean ext) {
+    public final SqlTab createTab(File f, boolean ext) {
         SqlTab tab = new SqlTab(f);
         tab.setTabLabel(f.getName().replaceAll(".sql", ""));
         tab.setIsExternal(ext);

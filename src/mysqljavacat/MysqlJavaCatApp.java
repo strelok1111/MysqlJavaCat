@@ -4,6 +4,8 @@
 
 package mysqljavacat;
 
+import java.io.File;
+import java.io.IOException;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Window;
@@ -41,14 +43,35 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     private ConfigDialog config_dialog;
     private MysqlJavaCatView view;
     private Properties prop = new Properties();
+    private String initDir = new String();
 
-    public MysqlJavaCatView getView(){
+    public MysqlJavaCatApp() {
+        File jarFile = new File(MysqlJavaCatApp.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+        initDir = new String ();
+        if (jarFile.exists()) {
+            try {
+                initDir = jarFile.getParentFile().getCanonicalPath() + File.separatorChar + ".mysqljavacat" + File.separatorChar;
+            } catch (SecurityException se) {
+                initDir = System.getProperty("user.home") + File.separatorChar + ".mysqljavacat" + File.separatorChar;
+            } catch (IOException iex) {
+                initDir = System.getProperty("user.home") + File.separatorChar + ".mysqljavacat" + File.separatorChar;
+            }
+
+            if (!(new File(initDir)).exists()) {
+                (new File(initDir)).mkdir();
+            }
+        }
+    }
+    public String getInitDir() {
+        return initDir;
+    }
+    public MysqlJavaCatView getView() {
         return view;
     }
-    public ConfigDialog getConfigDialog(){
+    public ConfigDialog getConfigDialog() {
         return config_dialog;
     }
-    public void saveToFile(String str,File file){
+    public void saveToFile(String str, File file) {
         PrintWriter fw = null;
         try {
             fw = new PrintWriter(file);
@@ -60,11 +83,11 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         }
 
     }
-    public void deleteFile(File file){
+    public void deleteFile(File file) {
         file.delete();
     }
 
-    public String readFromFile(File file){
+    public String readFromFile(File file) {
         String outline = null;
         try {
             FileReader input = new FileReader(file);
@@ -199,28 +222,26 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         return out_array;
     }
 
-
-
     /**
      * At startup create and show the main frame of the application.
      */
     public void loadProp(){
         try {
-            File f = new File("dbProperties.properties");
+            File f = new File(initDir + "db.conf");
             f.createNewFile();
             prop.load(new FileInputStream(f));
         } catch (IOException e) {
             showError(e.getMessage());
         }
     }
-     public void saveProp(){
+    public void saveProp(){
         try {
-            prop.store(new FileOutputStream("dbProperties.properties"), null);
+            prop.store(new FileOutputStream(initDir + "db.conf"), null);
         } catch (IOException e) {
             showError(e.getMessage());
         }
     }
-     public void saveTabs(){
+    public void saveTabs(){
         String opened = "";
         BASE64Encoder enc = new BASE64Encoder();
         for(SqlTab tab : view.getTabsMain().getSqlTabs()){
@@ -228,19 +249,19 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             opened = opened + enc.encode(tab.getFile().getAbsolutePath().getBytes()) + "|";
         }
         prop.setProperty("openedTabs", opened);        
-     }
+    }
     /**
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {        
-        if (!(new File("connections")).exists()) {
-            (new File("connections")).mkdir();
+        if (!(new File(initDir + "connections")).exists()) {
+            (new File(initDir + "connections")).mkdir();
         }
-        if (!(new File("closed")).exists()) {
-            (new File("closed")).mkdir();
+        if (!(new File(initDir + "closed")).exists()) {
+            (new File(initDir + "closed")).mkdir();
         }
-        if (!(new File("current")).exists()) {
-            (new File("current")).mkdir();
+        if (!(new File(initDir + "current")).exists()) {
+            (new File(initDir + "current")).mkdir();
         }
         loadProp();        
         view = new MysqlJavaCatView(this);
@@ -251,7 +272,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
             view.proxyRunConnect();
         }
     }
-     @Override protected void configureWindow(java.awt.Window root) {
+    @Override protected void configureWindow(java.awt.Window root) {
         root.addWindowListener(new WindowAdapter() {
 
         @Override
