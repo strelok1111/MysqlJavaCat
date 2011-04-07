@@ -1011,6 +1011,11 @@ public class MysqlJavaCatView extends FrameView {
                             }catch(SQLException e){
                                 obj = "0000-00-00";
                             }
+                            try{
+                                byte[] b = (byte[])obj;
+                                obj = new String(b);
+                            }catch(Exception e){
+                            }
                             arr[i-1] = obj;
                         }
                         defaultColumnModel.addRow(arr);
