@@ -50,7 +50,11 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         initDir = new String ();
         if (jarFile.exists()) {
             try {
-                initDir = jarFile.getParentFile().getCanonicalPath() + File.separatorChar + ".mysqljavacat" + File.separatorChar;
+                if(jarFile.getParentFile().canWrite() == true) {
+                    initDir = jarFile.getParentFile().getCanonicalPath() + File.separatorChar + ".mysqljavacat" + File.separatorChar;
+                } else {
+                    initDir = System.getProperty("user.home") + File.separatorChar + ".mysqljavacat" + File.separatorChar;
+                }
             } catch (SecurityException se) {
                 initDir = System.getProperty("user.home") + File.separatorChar + ".mysqljavacat" + File.separatorChar;
             } catch (IOException iex) {
