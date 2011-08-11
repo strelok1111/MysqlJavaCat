@@ -13,9 +13,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -25,13 +23,10 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
+import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import mysqljavacat.dialogs.ConfigDialog;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
 /**
  * The main class of the application.
  */
@@ -40,7 +35,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     private mysqljavacat.databaseobjects.Connection est_connection;
     private ConfigDialog config_dialog;
     private MysqlJavaCatView view;
-    private Properties prop = new Properties();
+    private Preferences prop = Preferences.userRoot().node("MysqlJavaCat");
 
     public MysqlJavaCatView getView(){
         return view;
@@ -88,7 +83,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     public Connection getConnection(){
         return dbConnection;
     }
-    public Properties getProperties(){
+    public Preferences getProperties(){
         return prop;
     }
 
@@ -106,17 +101,15 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     }
     public Connection setupConnection(mysqljavacat.databaseobjects.Connection con) throws SQLException,ClassNotFoundException{
         Class.forName("com.mysql.jdbc.Driver");        
-        Properties propert = con.getProperties();
-        String port = propert.getProperty("port", "3306");
-        String dsn = "jdbc:mysql://" + propert.getProperty("host") + ":" + (port.equals("") ? "3306" : port);
-        if(propert.getProperty("useSSH","0").equals("1")){
+        String dsn = "jdbc:mysql://" + con.dbHost + ":" + con.dbPort;
+        if(con.UseSSH){
             dsn = dsn
             + "?socketFactory=SSHSocketFactory"
-            + "&SSHHost=" + propert.getProperty("SSHhost")
-            + "&SSHUser=" + propert.getProperty("SSHuser")
-            + "&SSHPassword=" + propert.getProperty("SSHpass");
+            + "&SSHHost=" + con.SSHHost
+            + "&SSHUser=" + con.SSHUser
+            + "&SSHPassword=" + con.SSHPass;
         }
-        return DriverManager.getConnection(dsn,propert.getProperty("user"), propert.getProperty("password"));
+        return DriverManager.getConnection(dsn,con.dbUser, con.dbPassword);
     }
     public void connectToDb() throws SQLException{        
         try{
@@ -204,50 +197,20 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     /**
      * At startup create and show the main frame of the application.
      */
-    public void loadProp(){
-        try {
-            File f = new File("dbProperties.properties");
-            f.createNewFile();
-            prop.load(new FileInputStream(f));
-        } catch (IOException e) {
-            showError(e.getMessage());
-        }
-    }
-     public void saveProp(){
-        try {
-            prop.store(new FileOutputStream("dbProperties.properties"), null);
-        } catch (IOException e) {
-            showError(e.getMessage());
-        }
-    }
      public void saveTabs(){
-        String opened = "";
-        BASE64Encoder enc = new BASE64Encoder();
         for(SqlTab tab : view.getTabsMain().getSqlTabs()){
             tab.save();
-            opened = opened + enc.encode(tab.getFile().getAbsolutePath().getBytes()) + "|";
-        }
-        prop.setProperty("openedTabs", opened);        
+        }      
      }
     /**
      * At startup create and show the main frame of the application.
      */
-    @Override protected void startup() {        
-        if (!(new File("connections")).exists()) {
-            (new File("connections")).mkdir();
-        }
-        if (!(new File("closed")).exists()) {
-            (new File("closed")).mkdir();
-        }
-        if (!(new File("current")).exists()) {
-            (new File("current")).mkdir();
-        }
-        loadProp();        
+    @Override protected void startup() {                       
         view = new MysqlJavaCatView(this);
         config_dialog = new ConfigDialog(view.getFrame(),true);
         config_dialog.setLocationRelativeTo(view.getFrame());
         show(view);        
-        if(getProperties().getProperty("connectOnStartUp","0").equals("1")){
+        if(getProperties().getBoolean("connectOnStartUp",false)){
             view.proxyRunConnect();
         }
     }
@@ -257,7 +220,6 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         @Override
         public void windowClosing(WindowEvent e) {
                saveTabs();
-               saveProp();
         }
 
     });

@@ -82,7 +82,7 @@ public class OpenDialog extends javax.swing.JDialog {
                     }
                 }
                 if(!is_ex){
-                    MysqlJavaCatApp.getApplication().getView().getTabsMain().createTab(jFileChooser1.getSelectedFile(), true);
+                    MysqlJavaCatApp.getApplication().getView().getTabsMain().createTab(jFileChooser1.getSelectedFile());                    
                 }
                 dispose();
             }catch(Exception e){

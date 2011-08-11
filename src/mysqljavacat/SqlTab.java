@@ -5,9 +5,9 @@
 
 package mysqljavacat;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
 import mysqljavacat.dialogs.ComboDialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -20,6 +20,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
@@ -39,6 +40,7 @@ import javax.swing.table.DefaultTableModel;
 public class SqlTab extends JScrollPane{
     private JLabel tab_label;
     private JEditorPane editor;
+    private String uniqueName;
     private JPanel tab_header;
     private SqlTabbedPane sqlTab;
     private ComboDialog combo_dialog;
@@ -49,29 +51,30 @@ public class SqlTab extends JScrollPane{
     private Font notsavedfont = new Font("Arial",Font.BOLD | Font.ITALIC,12);
     private Font savedfont = new Font("Arial",Font.PLAIN,12);
     private boolean saved = false;
-    private boolean external = false;
-
+    private Preferences tabPref;
+    
     public void setResultColModel(DefaultTableModel model){
         result_col_model = model;
     }
+    
+    final public String getUniqueName(){
+        if (uniqueName == null)
+            uniqueName = "" + System.currentTimeMillis();
+        return uniqueName;
+    }
 
-    public void setIsExternal(boolean s){
-        external = s;
+    public String getTabName(){
+        return tab_label.getText();
     }
-    public boolean isExternal(){
-        return external;
-    }
+    
     public boolean isSaved(){
         return saved;
     }
     public void save(){
-        try {
-            file.createNewFile();
+        if(file == null){
+            tabPref.put("content", editor.getText());
+        }else{
             MysqlJavaCatApp.getApplication().saveToFile(editor.getText(), file);
-            saved = true;
-            tab_label.setFont(savedfont);
-        } catch (IOException ex) {
-            Logger.getLogger(SqlTab.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     public DefaultTableModel getResultColModel(){
@@ -92,19 +95,45 @@ public class SqlTab extends JScrollPane{
     public void setSqlTab(SqlTabbedPane s){
         sqlTab = s;
     }
-    private SqlTab getSqlTab(){
-        return this;
-    }
     public ComboDialog getComboDialog(){
         return combo_dialog;
     }
-    public SqlTab(File file_in) {
+    
+    public SqlTab(String uniqueName) {
         editor = new JEditorPane();
-        file = file_in;        
+        tab_label = new JLabel();
+        tab_header = new JPanel();
         this.setBorder(null);
         this.setViewportView(editor);
         editor.setContentType("text/sql");        
         combo_dialog = new ComboDialog(editor);
+        
+        try {
+            if(Preferences.userRoot().node("MysqlJavaCat").node("tabs").nodeExists(uniqueName)){
+                tabPref = Preferences.userRoot().node("MysqlJavaCat").node("tabs").node(uniqueName);
+                
+
+                tab_label.setText(tabPref.get("name",""));
+                String file_path = tabPref.get("file","");
+                if(file_path != null && !file_path.isEmpty() && file.exists()){
+                    file = new File(file_path);
+                    editor.setText(MysqlJavaCatApp.getApplication().readFromFile(file));
+                }else{
+                    editor.setText(tabPref.get("content",""));
+                }
+            }else{
+                tab_label.setText(uniqueName);
+                String uniqueNameGenerated = getUniqueName();
+                tabPref = Preferences.userRoot().node("MysqlJavaCat").node("tabs").node(uniqueNameGenerated);
+                tabPref.put("name", uniqueName);
+            }
+        } catch (BackingStoreException ex) {
+            Logger.getLogger(SqlTab.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        
+        
         editor.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
 
@@ -220,8 +249,7 @@ public class SqlTab extends JScrollPane{
             close();
           }
         });
-        tab_label = new JLabel();
-        tab_header = new JPanel();
+        
         /*
          * TODO edit tab header
         final JTextField tab_edit = new JTextField();
@@ -256,23 +284,21 @@ public class SqlTab extends JScrollPane{
         tab_header.setFocusable(false);
         tab_header.setBorder(null);
         tab_header.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        tab_header.add(tabCloseButton);
-        if(file.exists()){
-            saved = true;
-            editor.setText(MysqlJavaCatApp.getApplication().readFromFile(file));
-            tab_label.setFont(savedfont);
-        }else{
-            tab_label.setFont(notsavedfont);
-        }
+        tab_header.add(tabCloseButton);        
     }
     public void close(){
-        sqlTab.remove(getSqlTab());
-        if(!external){
-            MysqlJavaCatApp.getApplication().deleteFile(file);
+        try {
+            tabPref.removeNode();
+        } catch (BackingStoreException ex) {
+            Logger.getLogger(SqlTab.class.getName()).log(Level.SEVERE, null, ex);
         }
+        sqlTab.remove(this);        
     }
     public File getFile(){
         return file;
+    }
+    public void setFile(File f){
+        file = f;
     }
     public void setFileSave(File f){
         file = f;
