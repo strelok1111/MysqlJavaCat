@@ -1,0 +1,12 @@
+Package: MysqlJavaCat
+Version: 0.2.10
+Architecture: all
+Depends: openjdk-6-jre
+Pre-Depends: 
+Recommends: sun-java6-jre
+Maintainer: Strelok [steel_heart@bk.ru]
+Conflicts: 
+Replaces: 
+Provides: MysqlJavaCat
+Description: 
+
