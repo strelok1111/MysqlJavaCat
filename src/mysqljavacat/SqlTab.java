@@ -72,10 +72,12 @@ public class SqlTab extends JScrollPane{
     }
     public void save(){
         if(file == null){
-            tabPref.put("content", editor.getText());
+            tabPref.put("content", editor.getText());            
         }else{
             MysqlJavaCatApp.getApplication().saveToFile(editor.getText(), file);
         }
+        saved = true;
+        tab_label.setFont(savedfont);
     }
     public DefaultTableModel getResultColModel(){
         return result_col_model;
