@@ -27,6 +27,7 @@ import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import mysqljavacat.dialogs.ConfigDialog;
+import org.jdesktop.application.Task;
 /**
  * The main class of the application.
  */
@@ -211,7 +212,17 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         config_dialog.setLocationRelativeTo(view.getFrame());
         show(view);        
         if(getProperties().getBoolean("connectOnStartUp",false)){
-            view.proxyRunConnect();
+            Task task = new Task(this) {
+                 
+                 @Override
+                 protected Object doInBackground() throws Exception { 
+                   view.proxyRunConnect(); 
+                   return null;
+                }  
+            };
+            getContext().getTaskService().execute(task);
+            getContext().getTaskMonitor().setForegroundTask(task);
+            
         }
     }
      @Override protected void configureWindow(java.awt.Window root) {

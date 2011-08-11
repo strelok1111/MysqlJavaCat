@@ -964,7 +964,7 @@ public class MysqlJavaCatView extends FrameView {
                 }
             }
             @Override
-            protected Object doInBackground() throws Exception {
+            protected Object doInBackground() throws Exception {                
                 closeGui();
                 SqlTab tab =  tabs.getSelectedtab();
                 tab.save();

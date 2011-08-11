@@ -110,7 +110,7 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(imageLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 380, Short.MAX_VALUE)
+                    .addComponent(imageLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 389, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(appTitleLabel)
                         .addGap(46, 46, 46)
