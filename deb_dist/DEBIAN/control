@@ -1,4 +1,5 @@
-Package: MysqlJavaCat
+Package: mysqljavacat
+Source: mysqljavacat
 Version: 0.2.10
 Architecture: all
 Depends: openjdk-6-jre

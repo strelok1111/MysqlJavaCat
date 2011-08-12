@@ -97,7 +97,7 @@ public class ComboDialog extends javax.swing.JDialog {
     public ArrayList<Object> getQueryTables(DatabaseObj db){
         ArrayList<Object> out = new ArrayList<Object>();
         HashMap<String,Boolean> det = new HashMap<String,Boolean>();
-        String [] words = edit.getText().split("\\s+");
+        String [] words = edit.getText().split("\\s+|\\.");
         for(String s : words)
             if(db.getTable(s) != null && det.get(s) == null){
                 out.add(db.getTable(s));
