@@ -15,7 +15,7 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
         super(parent);
         initComponents();
         appVersionLabel.setText(mysqljavacat.MysqlJavaCatApp.getApplication().VERSION);
-        
+       /* 
         URL yahoo = new URL("http://www.yahoo.com/");
         URLConnection yc = yahoo.openConnection();
         BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
@@ -25,6 +25,8 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
             System.out.println(inputLine);
         in.close();
 
+        
+         */
         
         getRootPane().setDefaultButton(closeButton);        
     }
