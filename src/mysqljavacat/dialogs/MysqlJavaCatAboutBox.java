@@ -5,6 +5,7 @@
 package mysqljavacat.dialogs;
 
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import org.jdesktop.application.Action;
@@ -15,18 +16,20 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
         super(parent);
         initComponents();
         appVersionLabel.setText(mysqljavacat.MysqlJavaCatApp.getApplication().VERSION);
-       /* 
-        URL yahoo = new URL("http://www.yahoo.com/");
-        URLConnection yc = yahoo.openConnection();
-        BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
-        String inputLine;
-
-        while ((inputLine = in.readLine()) != null) 
-            System.out.println(inputLine);
-        in.close();
-
-        
-         */
+       
+        URL yahoo;
+        try {
+            yahoo = new URL("https://raw.github.com/strelok1111/MysqlJavaCat/master/VERSION");
+       
+            URLConnection yc = yahoo.openConnection();
+            BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) 
+                System.out.println(inputLine);
+            in.close();
+        }catch(Exception e){
+        }
+      
         
         getRootPane().setDefaultButton(closeButton);        
     }
