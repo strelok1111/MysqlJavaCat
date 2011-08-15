@@ -4,14 +4,29 @@
 
 package mysqljavacat.dialogs;
 
+import java.io.BufferedReader;
+import java.net.URL;
+import java.net.URLConnection;
 import org.jdesktop.application.Action;
 
 public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
-
+    
     public MysqlJavaCatAboutBox(java.awt.Frame parent) {
         super(parent);
         initComponents();
-        getRootPane().setDefaultButton(closeButton);
+        appVersionLabel.setText(mysqljavacat.MysqlJavaCatApp.getApplication().VERSION);
+        
+        URL yahoo = new URL("http://www.yahoo.com/");
+        URLConnection yc = yahoo.openConnection();
+        BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+        String inputLine;
+
+        while ((inputLine = in.readLine()) != null) 
+            System.out.println(inputLine);
+        in.close();
+
+        
+        getRootPane().setDefaultButton(closeButton);        
     }
 
     @Action public void closeAboutBox() {
@@ -29,7 +44,7 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
         closeButton = new javax.swing.JButton();
         javax.swing.JLabel appTitleLabel = new javax.swing.JLabel();
         javax.swing.JLabel versionLabel = new javax.swing.JLabel();
-        javax.swing.JLabel appVersionLabel = new javax.swing.JLabel();
+        appVersionLabel = new javax.swing.JLabel();
         javax.swing.JLabel vendorLabel = new javax.swing.JLabel();
         javax.swing.JLabel appVendorLabel = new javax.swing.JLabel();
         javax.swing.JLabel homepageLabel = new javax.swing.JLabel();
@@ -134,6 +149,7 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel appVersionLabel;
     private javax.swing.JButton closeButton;
     // End of variables declaration//GEN-END:variables
     
