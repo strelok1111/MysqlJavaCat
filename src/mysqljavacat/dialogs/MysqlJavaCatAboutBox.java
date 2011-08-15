@@ -181,9 +181,9 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                     in.close();
                 }catch(Exception e){
                 }
-                if(!MysqlJavaCatApp.getApplication().VERSION.equals(version)){
+                //if(!MysqlJavaCatApp.getApplication().VERSION.equals(version)){
                      upgradeButton.setVisible(true);
-                }
+                //}
                 return null;
             }
         };
@@ -231,8 +231,20 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                     
                     Runtime run = Runtime.getRuntime();
                     if(currentOs.equals("LINUX")){
-                        run.exec("gksudo dpkg -i " + tempfile);                    
-                        run.exec("rm " + tempfile);
+                        //run.exec(); 
+                        
+                        Process pr = run.exec("gksudo \"dpkg -i " + tempfile + "\"");
+                        pr.waitFor();
+                        BufferedReader buf = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                        BufferedReader buf1 = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+                        String line = "";
+                        while ((line=buf.readLine())!=null) {
+                                System.out.println(line);
+                        }
+                        while ((line=buf1.readLine())!=null) {
+                                System.out.println(line);
+                        }
+                        //run.exec("rm " + tempfile);
                     }else if(currentOs.equals("WINDOWS")){
                         run.exec("start /B msiexec /i " + tempfile);
                     }
