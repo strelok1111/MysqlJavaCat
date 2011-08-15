@@ -9,5 +9,5 @@ Maintainer: Strelok [steel_heart@bk.ru]
 Conflicts: 
 Replaces: 
 Provides: MysqlJavaCat
-Description: 
+Description: Simple mysql dev tool 
 
