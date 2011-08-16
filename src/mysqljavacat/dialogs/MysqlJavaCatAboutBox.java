@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.Security;
 import mysqljavacat.MysqlJavaCatApp;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Task;
@@ -241,13 +242,14 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                     String tempfile = "";
                     String currentOs = System.getProperty("os.name").toUpperCase();
                     
-                    if(currentOs.equals("LINUX")){
+                    if(currentOs.startsWith("LINUX")){
                         url = "https://github.com/strelok1111/MysqlJavaCat/raw/master/MysqlJavaCat.deb";
                         tempfile = System.getProperty("java.io.tmpdir") + "/MysqlJavaCat.deb";
-                    }else if(currentOs.equals("WINDOWS")){
-                        url = "https://github.com/strelok1111/MysqlJavaCat/raw/master/Win/mysqljavacat.msi";
-                        tempfile = System.getProperty("java.io.tmpdir") + "\\mysqljavacat.msi"; 
+                    }else if(currentOs.startsWith("WINDOWS")){
+                        url = "https://github.com/strelok1111/MysqlJavaCat/raw/master/Win/mysqljavacat_win_dist.exe";
+                        tempfile = System.getProperty("java.io.tmpdir") + "mysqljavacat_win_dist.exe"; 
                     }
+                    
                     
                     URL check_version;
                     check_version = new URL(url);
@@ -263,7 +265,7 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                       jProgressBar1.setMaximum(totBytes);
                       FileOutputStream fos = new FileOutputStream(tempfile);
                       while  ( (bytes = is.read(buffer, 0, 1024)) != -1)  {       
-                         sumBytes += bytes; 
+                         sumBytes += bytes;
                          fos.write ( buffer,0,bytes ) ; 
                          jProgressBar1.setValue(sumBytes);
                          jLabel1.setText("Downloaded " + sumBytes/1024 + " Kb of" + totBytes/1024 + " Kb.");                        
@@ -271,18 +273,18 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                       fos.close(); 
                     }  
                     huc.disconnect();                                      
-
-                    
+                    System.out.println(tempfile);
                     Runtime run = Runtime.getRuntime();
-                    if(currentOs.equals("LINUX")){
+                    if(currentOs.startsWith("LINUX")){
                         String cmd = "mysqljavacat_deb_update " + tempfile + " &";
                         Process pr = run.exec(cmd);
-                        MysqlJavaCatApp.getApplication().exit();                        
-                    }else if(currentOs.equals("WINDOWS")){
-                        run.exec("start /B msiexec /i " + tempfile);
+                        //MysqlJavaCatApp.getApplication().exit();                        
+                    }else if(currentOs.startsWith("WINDOWS")){
+                        run.exec("cmd.exe start /B " + tempfile);
                         MysqlJavaCatApp.getApplication().exit();
                     }
                 }catch(Exception e){
+                    System.out.println(e);
                 }
                 
                 return null;
