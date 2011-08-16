@@ -272,8 +272,7 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                       }  
                       fos.close(); 
                     }  
-                    huc.disconnect();                                      
-                    System.out.println(tempfile);
+                    huc.disconnect();
                     Runtime run = Runtime.getRuntime();
                     if(currentOs.startsWith("LINUX")){
                         String cmd = "mysqljavacat_deb_update " + tempfile + " &";
