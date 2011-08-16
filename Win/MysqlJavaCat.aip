@@ -7,7 +7,7 @@
     <ROW Property="ProductCode" Value="1033:{0CD6FF9C-E900-4F12-B2FF-2F3DB76C2531} 2057:{E286CC78-0468-4923-A935-2285CFC81CBE} " Type="16"/>
     <ROW Property="ProductLanguage" Value="2057"/>
     <ROW Property="ProductName" Value="MysqlJavaCat" ValueLocId="*"/>
-    <ROW Property="ProductVersion" Value="0.2.13"/>
+    <ROW Property="ProductVersion" Value="0.2.14"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{CB966665-AE80-4171-AEE9-58395B08BA6A}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
