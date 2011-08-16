@@ -4,11 +4,11 @@
 
 package mysqljavacat.dialogs;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import mysqljavacat.MysqlJavaCatApp;
@@ -19,7 +19,13 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
     
     public MysqlJavaCatAboutBox(java.awt.Frame parent) {
         super(parent);
-        initComponents();        
+        initComponents();
+        jProgressBar1.setVisible(false);
+        jLabel1.setVisible(false);
+        upgradeButton.setVisible(false);
+        statusAnimationLabel.setVisible(false);
+        
+        
         getRootPane().setDefaultButton(closeButton);        
     }
 
@@ -43,9 +49,11 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
         javax.swing.JLabel appVendorLabel = new javax.swing.JLabel();
         javax.swing.JLabel homepageLabel = new javax.swing.JLabel();
         javax.swing.JLabel appHomepageLabel = new javax.swing.JLabel();
-        javax.swing.JLabel imageLabel = new javax.swing.JLabel();
         upgradeButton = new javax.swing.JButton();
+        javax.swing.JLabel imageLabel = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        jProgressBar1 = new javax.swing.JProgressBar();
+        statusAnimationLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(mysqljavacat.MysqlJavaCatApp.class).getContext().getResourceMap(MysqlJavaCatAboutBox.class);
@@ -88,18 +96,24 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
         appHomepageLabel.setText(resourceMap.getString("Application.homepage")); // NOI18N
         appHomepageLabel.setName("appHomepageLabel"); // NOI18N
 
+        upgradeButton.setAction(actionMap.get("update")); // NOI18N
+        upgradeButton.setText(resourceMap.getString("upgradeButton.text")); // NOI18N
+        upgradeButton.setName("upgradeButton"); // NOI18N
+
         imageLabel.setIcon(resourceMap.getIcon("imageLabel.icon")); // NOI18N
         imageLabel.setMaximumSize(null);
         imageLabel.setMinimumSize(null);
         imageLabel.setName("imageLabel"); // NOI18N
         imageLabel.setPreferredSize(null);
 
-        upgradeButton.setAction(actionMap.get("update")); // NOI18N
-        upgradeButton.setText(resourceMap.getString("upgradeButton.text")); // NOI18N
-        upgradeButton.setName("upgradeButton"); // NOI18N
-
         jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
+
+        jProgressBar1.setName("jProgressBar1"); // NOI18N
+
+        statusAnimationLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        statusAnimationLabel.setIcon(resourceMap.getIcon("statusAnimationLabel.icon")); // NOI18N
+        statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -110,21 +124,31 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(closeButton, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(appTitleLabel, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(upgradeButton, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(versionLabel)
-                                .addComponent(vendorLabel)
-                                .addComponent(homepageLabel))
-                            .addGap(34, 34, 34)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(appVersionLabel)
-                                .addComponent(appVendorLabel)))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
-                .addComponent(appHomepageLabel)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(versionLabel)
+                                    .addComponent(vendorLabel))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(34, 34, 34)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(appVersionLabel)
+                                            .addComponent(appVendorLabel))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 102, Short.MAX_VALUE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(statusAnimationLabel))))
+                            .addComponent(appTitleLabel, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 46, Short.MAX_VALUE)
+                        .addComponent(appHomepageLabel))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 354, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(homepageLabel)
+                        .addGap(46, 46, 46))
+                    .addComponent(upgradeButton, javax.swing.GroupLayout.DEFAULT_SIZE, 354, Short.MAX_VALUE)
+                    .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 354, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -132,28 +156,35 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(imageLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 389, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(appTitleLabel)
-                        .addGap(46, 46, 46)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(versionLabel)
-                            .addComponent(appVersionLabel))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(appTitleLabel)
+                                .addGap(46, 46, 46)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(versionLabel)
+                                            .addComponent(appVersionLabel))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                            .addComponent(vendorLabel)
+                                            .addComponent(appVendorLabel)))
+                                    .addComponent(statusAnimationLabel)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(128, 128, 128)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(homepageLabel)
+                                    .addComponent(appHomepageLabel))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(upgradeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(vendorLabel)
-                            .addComponent(appVendorLabel))
+                        .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(homepageLabel)
-                        .addGap(39, 39, 39)
-                        .addComponent(upgradeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(closeButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(128, 128, 128)
-                        .addComponent(appHomepageLabel))
-                    .addComponent(imageLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 389, Short.MAX_VALUE))
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 107, Short.MAX_VALUE)
+                        .addComponent(closeButton)))
                 .addContainerGap())
         );
 
@@ -163,10 +194,12 @@ public class MysqlJavaCatAboutBox extends javax.swing.JDialog {
 private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_checkVersion
         MysqlJavaCatApp app = MysqlJavaCatApp.getApplication(); 
         appVersionLabel.setText(app.VERSION);
+        jProgressBar1.setVisible(false);
+        jLabel1.setVisible(false);
         upgradeButton.setVisible(false);
         Task queryTask = new Task(app) {
             @Override
-            protected Object doInBackground() throws Exception {
+            protected Object doInBackground() throws Exception {               
                 String version = "";
                 try {
                     URL check_version;
@@ -181,13 +214,16 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                     in.close();
                 }catch(Exception e){
                 }
-                //if(!MysqlJavaCatApp.getApplication().VERSION.equals(version)){
+                statusAnimationLabel.setVisible(false);
+                if(!MysqlJavaCatApp.getApplication().VERSION.equals(version)){
+                     jProgressBar1.setVisible(true);
+                     jLabel1.setVisible(true);
                      upgradeButton.setVisible(true);
-                //}
+                }
                 return null;
             }
         };
-      
+        statusAnimationLabel.setVisible(true);
         app.getContext().getTaskService().execute(queryTask);
         app.getContext().getTaskMonitor().setForegroundTask(queryTask);
 }//GEN-LAST:event_checkVersion
@@ -199,11 +235,12 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
         Task queryTask = new Task(app) {
             @Override
             protected Object doInBackground() throws Exception {
-                String version = "";
                 try {
+                    
                     String url = "";
                     String tempfile = "";
                     String currentOs = System.getProperty("os.name").toUpperCase();
+                    
                     if(currentOs.equals("LINUX")){
                         url = "https://github.com/strelok1111/MysqlJavaCat/raw/master/MysqlJavaCat.deb";
                         tempfile = System.getProperty("java.io.tmpdir") + "/MysqlJavaCat.deb";
@@ -215,38 +252,35 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                     URL check_version;
                     check_version = new URL(url);
                     
-                    BufferedInputStream in = new BufferedInputStream(check_version.openStream());
-                    FileOutputStream fos = new java.io.FileOutputStream(tempfile);
-                    BufferedOutputStream bout = new BufferedOutputStream(fos,1024);
-                    byte data[] = new byte[1024];
-                    int count;
-                    int countAll = 0;                    
-                    while( (count = in.read(data, 0, 1024)) != -1){
-                        bout.write(data,0,count);
-                        countAll = countAll + count;
-                        jLabel1.setText("Downloaded " + countAll + " bytes");                        
-                    }
-                    bout.close();
-                    in.close();
+                    HttpURLConnection huc =  ( HttpURLConnection )  check_version.openConnection (  ) ;
+                    huc.setRequestMethod("GET");  
+                    huc.connect();
+                    InputStream is = huc.getInputStream();                    
+                    int totBytes,bytes,sumBytes = 0;
+                    byte buffer[] = new byte[1024];
+                    totBytes = huc.getContentLength () ;
+                    if  ( huc.getResponseCode() == HttpURLConnection.HTTP_OK ) {
+                      jProgressBar1.setMaximum(totBytes);
+                      FileOutputStream fos = new FileOutputStream(tempfile);
+                      while  ( (bytes = is.read(buffer, 0, 1024)) != -1)  {       
+                         sumBytes += bytes; 
+                         fos.write ( buffer,0,bytes ) ; 
+                         jProgressBar1.setValue(sumBytes);
+                         jLabel1.setText("Downloaded " + sumBytes/1024 + " Kb of" + totBytes/1024 + " Kb.");                        
+                      }  
+                      fos.close(); 
+                    }  
+                    huc.disconnect();                                      
+
                     
                     Runtime run = Runtime.getRuntime();
                     if(currentOs.equals("LINUX")){
-                        //run.exec(); 
-                        
-                        Process pr = run.exec("gksudo \"dpkg -i " + tempfile + "\"");
-                        pr.waitFor();
-                        BufferedReader buf = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-                        BufferedReader buf1 = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
-                        String line = "";
-                        while ((line=buf.readLine())!=null) {
-                                System.out.println(line);
-                        }
-                        while ((line=buf1.readLine())!=null) {
-                                System.out.println(line);
-                        }
-                        //run.exec("rm " + tempfile);
+                        String cmd = "mysqljavacat_deb_update " + tempfile + " &";
+                        Process pr = run.exec(cmd);
+                        MysqlJavaCatApp.getApplication().exit();                        
                     }else if(currentOs.equals("WINDOWS")){
                         run.exec("start /B msiexec /i " + tempfile);
+                        MysqlJavaCatApp.getApplication().exit();
                     }
                 }catch(Exception e){
                 }
@@ -264,6 +298,8 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
     private javax.swing.JLabel appVersionLabel;
     private javax.swing.JButton closeButton;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JButton upgradeButton;
     // End of variables declaration//GEN-END:variables
     

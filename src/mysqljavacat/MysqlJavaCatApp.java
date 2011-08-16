@@ -36,7 +36,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     private mysqljavacat.databaseobjects.Connection est_connection;
     private ConfigDialog config_dialog;
     private MysqlJavaCatView view;
-    public String VERSION = "0.2.12";
+    public String VERSION = "0.2.13";
     private Preferences prop = Preferences.userRoot().node("MysqlJavaCat");
 
     public MysqlJavaCatView getView(){

@@ -1,7 +1,5 @@
 package mysqljavacat;
 
-import com.mysql.jdbc.StringUtils;
-import java.awt.Component;
 import mysqljavacat.dialogs.MysqlJavaCatAboutBox;
 import mysqljavacat.databaseobjects.DatabaseObj;
 import mysqljavacat.databaseobjects.TableObj;
@@ -24,7 +22,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -39,7 +36,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JTree;
