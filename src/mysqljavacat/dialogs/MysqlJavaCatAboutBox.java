@@ -280,7 +280,7 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                         Process pr = run.exec(cmd);
                         //MysqlJavaCatApp.getApplication().exit();                        
                     }else if(currentOs.startsWith("WINDOWS")){
-                        run.exec("cmd.exe start /B " + tempfile);
+                        run.exec("cmd.exe /c start /B " + tempfile);
                         MysqlJavaCatApp.getApplication().exit();
                     }
                 }catch(Exception e){
