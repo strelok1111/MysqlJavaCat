@@ -272,13 +272,14 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                         }  
                         fos.close(); 
                         Runtime run = Runtime.getRuntime();
-                        if(currentOs.startsWith("LINUX")){
-                            String cmd = "mysqljavacat_deb_update " + tempfile + " &";
-                            run.exec(cmd);                       
+                        if(currentOs.startsWith("LINUX")){                            
+                            run.exec("mysqljavacat_deb_update " + tempfile);
+                            jLabel1.setText("Now you need to restart app.");
                         }else if(currentOs.startsWith("WINDOWS")){
                             run.exec("cmd.exe /c start /B " + tempfile);
+                            MysqlJavaCatApp.getApplication().exit();
                         }
-                        jLabel1.setText("Now you need to restart app.");
+                        
                     }else{
                         jLabel1.setText("Error download file.");
                     }  
