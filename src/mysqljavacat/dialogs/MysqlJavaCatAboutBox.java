@@ -274,7 +274,7 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                         Runtime run = Runtime.getRuntime();
                         if(currentOs.startsWith("LINUX")){
                             String cmd = "mysqljavacat_deb_update " + tempfile + " &";
-                            Process pr = run.exec(cmd);                       
+                            run.exec(cmd);                       
                         }else if(currentOs.startsWith("WINDOWS")){
                             run.exec("cmd.exe /c start /B " + tempfile);
                         }
