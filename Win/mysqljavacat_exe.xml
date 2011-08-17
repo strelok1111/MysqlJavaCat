@@ -1,0 +1,29 @@
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>/var/projects/MysqlJavaCat/dist/MysqlJavaCat.jar</jar>
+  <outfile>/var/projects/MysqlJavaCat/Win/MysqlJavaCat.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir></chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <customProcName>false</customProcName>
+  <stayAlive>true</stayAlive>
+  <manifest></manifest>
+  <icon>/var/projects/MysqlJavaCat/Win/mysqljavacat.ico</icon>
+  <jre>
+    <path></path>
+    <minVersion>1.5.0</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+  </jre>
+  <messages>
+    <startupErr>An error occurred while starting the application.</startupErr>
+    <bundledJreErr>This application was configured to use a bundled Java Runtime Environment but the runtime is missing or corrupted.</bundledJreErr>
+    <jreVersionErr>This application requires a Java Runtime Environment</jreVersionErr>
+    <launcherErr>The registry refers to a nonexistent Java Runtime Environment installation or the runtime is corrupted.</launcherErr>
+    <instanceAlreadyExistsMsg>An application instance is already running.</instanceAlreadyExistsMsg>
+  </messages>
+</launch4jConfig>
