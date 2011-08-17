@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.Security;
 import mysqljavacat.MysqlJavaCatApp;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Task;
@@ -197,7 +196,7 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
         appVersionLabel.setText(app.VERSION);
         jProgressBar1.setVisible(false);
         jLabel1.setVisible(false);
-        upgradeButton.setVisible(false);
+        upgradeButton.setVisible(false);        
         Task queryTask = new Task(app) {
             @Override
             protected Object doInBackground() throws Exception {               
@@ -216,10 +215,10 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                 }catch(Exception e){
                 }
                 statusAnimationLabel.setVisible(false);
-                if(!MysqlJavaCatApp.getApplication().VERSION.equals(version)){
-                     jProgressBar1.setVisible(true);
-                     jLabel1.setVisible(true);
+                if(!MysqlJavaCatApp.getApplication().VERSION.equals(version)){                     
                      upgradeButton.setVisible(true);
+                     upgradeButton.setEnabled(true);
+                     upgradeButton.setText("Upgrade to " + version);
                 }
                 return null;
             }
@@ -230,7 +229,7 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
 }//GEN-LAST:event_checkVersion
 
     @Action
-    public void update() {
+    public void update() {        
         
         MysqlJavaCatApp app = MysqlJavaCatApp.getApplication();
         Task queryTask = new Task(app) {
@@ -262,26 +261,29 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                     byte buffer[] = new byte[1024];
                     totBytes = huc.getContentLength () ;
                     if  ( huc.getResponseCode() == HttpURLConnection.HTTP_OK ) {
-                      jProgressBar1.setMaximum(totBytes);
-                      FileOutputStream fos = new FileOutputStream(tempfile);
-                      while  ( (bytes = is.read(buffer, 0, 1024)) != -1)  {       
-                         sumBytes += bytes;
-                         fos.write ( buffer,0,bytes ) ; 
-                         jProgressBar1.setValue(sumBytes);
-                         jLabel1.setText("Downloaded " + sumBytes/1024 + " Kb of" + totBytes/1024 + " Kb.");                        
-                      }  
-                      fos.close(); 
+                        jProgressBar1.setVisible(true);
+                        jProgressBar1.setMaximum(totBytes);
+                        FileOutputStream fos = new FileOutputStream(tempfile);
+                        while  ( (bytes = is.read(buffer, 0, 1024)) != -1)  {       
+                            sumBytes += bytes;
+                            fos.write ( buffer,0,bytes ) ; 
+                            jProgressBar1.setValue(sumBytes);
+                            jLabel1.setText("Downloaded " + sumBytes/1024 + " Kb of" + totBytes/1024 + " Kb.");                        
+                        }  
+                        fos.close(); 
+                        Runtime run = Runtime.getRuntime();
+                        if(currentOs.startsWith("LINUX")){
+                            String cmd = "mysqljavacat_deb_update " + tempfile + " &";
+                            Process pr = run.exec(cmd);                       
+                        }else if(currentOs.startsWith("WINDOWS")){
+                            run.exec("cmd.exe /c start /B " + tempfile);
+                        }
+                        jLabel1.setText("Now you need to restart app.");
+                    }else{
+                        jLabel1.setText("Error download file.");
                     }  
                     huc.disconnect();
-                    Runtime run = Runtime.getRuntime();
-                    if(currentOs.startsWith("LINUX")){
-                        String cmd = "mysqljavacat_deb_update " + tempfile + " &";
-                        Process pr = run.exec(cmd);
-                        //MysqlJavaCatApp.getApplication().exit();                        
-                    }else if(currentOs.startsWith("WINDOWS")){
-                        run.exec("cmd.exe /c start /B " + tempfile);
-                        MysqlJavaCatApp.getApplication().exit();
-                    }
+                    
                 }catch(Exception e){
                     System.out.println(e);
                 }
@@ -289,7 +291,8 @@ private void checkVersion(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_
                 return null;
             }
         };
-      
+        jLabel1.setVisible(true);        
+        upgradeButton.setEnabled(false);
         app.getContext().getTaskService().execute(queryTask);
         app.getContext().getTaskMonitor().setForegroundTask(queryTask);
     }

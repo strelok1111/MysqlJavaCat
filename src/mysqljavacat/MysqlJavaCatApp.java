@@ -36,10 +36,10 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     private mysqljavacat.databaseobjects.Connection est_connection;
     private ConfigDialog config_dialog;
     private MysqlJavaCatView view;
-    public String VERSION = "0.2.14";
+    public String VERSION;
     private Preferences prop = Preferences.userRoot().node("MysqlJavaCat");
 
-    public MysqlJavaCatView getView(){
+    public MysqlJavaCatView getView(){        
         return view;
     }
     public ConfigDialog getConfigDialog(){
@@ -211,7 +211,8 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         view = new MysqlJavaCatView(this);
         config_dialog = new ConfigDialog(view.getFrame(),true);
         config_dialog.setLocationRelativeTo(view.getFrame());
-        show(view);        
+        show(view);
+        VERSION = getContext().getResourceMap(MysqlJavaCatApp.class).getString("Application.version");
         if(getProperties().getBoolean("connectOnStartUp",false)){
             Task task = new Task(this) {
                  
