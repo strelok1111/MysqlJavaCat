@@ -6,27 +6,21 @@ package mysqljavacat;
 
 import java.awt.Component;
 import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.Window;
-import org.jdesktop.application.Application;
-import org.jdesktop.application.SingleFrameApplication;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
+import java.io.*;
+import java.sql.*;
 import java.util.ArrayList;
-import java.sql.DriverManager;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import mysqljavacat.dialogs.ConfigDialog;
+import org.jdesktop.application.Application;
+import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.Task;
 /**
  * The main class of the application.
@@ -255,7 +249,25 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     /**
      * Main method launching the application.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args){
+        Toolkit xToolkit = Toolkit.getDefaultToolkit();
+        java.lang.reflect.Field awtAppClassNameField;
+        try {
+            awtAppClassNameField = xToolkit.getClass().getDeclaredField("awtAppClassName");
+            awtAppClassNameField.setAccessible(true);
+            try {
+                awtAppClassNameField.set(xToolkit, "mysqljavacat");
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (NoSuchFieldException ex) {
+            Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         launch(MysqlJavaCatApp.class, args);
     }
     public static Frame getFrameFor(Component comp) {
