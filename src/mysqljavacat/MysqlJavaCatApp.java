@@ -11,10 +11,9 @@ import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -33,7 +32,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     public String VERSION;
     private Preferences prop = Preferences.userRoot().node("MysqlJavaCat");
 
-    public MysqlJavaCatView getView(){        
+    public MysqlJavaCatView getView(){
         return view;
     }
     public ConfigDialog getConfigDialog(){
@@ -96,7 +95,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         }
     }
     public Connection setupConnection(mysqljavacat.databaseobjects.Connection con) throws SQLException,ClassNotFoundException{
-        Class.forName("com.mysql.jdbc.Driver");        
+        Class.forName("com.mysql.jdbc.Driver");
         String dsn = "jdbc:mysql://" + con.dbHost + ":" + con.dbPort;
         if(con.UseSSH){
             dsn = dsn
@@ -107,7 +106,7 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         }
         return DriverManager.getConnection(dsn,con.dbUser, con.dbPassword);
     }
-    public void connectToDb() throws SQLException{        
+    public void connectToDb() throws SQLException{
         try{
             dbConnection = setupConnection(config_dialog.getCurConnect());
             est_connection = config_dialog.getCurConnect();
@@ -196,12 +195,12 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
      public void saveTabs(){
         for(SqlTab tab : view.getTabsMain().getSqlTabs()){
             tab.save();
-        }      
+        }
      }
     /**
      * At startup create and show the main frame of the application.
      */
-    @Override protected void startup() {                       
+    @Override protected void startup() {
         view = new MysqlJavaCatView(this);
         config_dialog = new ConfigDialog(view.getFrame(),true);
         config_dialog.setLocationRelativeTo(view.getFrame());
@@ -209,16 +208,16 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
         VERSION = getContext().getResourceMap(MysqlJavaCatApp.class).getString("Application.version");
         if(getProperties().getBoolean("connectOnStartUp",false)){
             Task task = new Task(this) {
-                 
+
                  @Override
-                 protected Object doInBackground() throws Exception { 
-                   view.proxyRunConnect(); 
+                 protected Object doInBackground() throws Exception {
+                   view.proxyRunConnect();
                    return null;
-                }  
+                }
             };
             getContext().getTaskService().execute(task);
             getContext().getTaskMonitor().setForegroundTask(task);
-            
+
         }
     }
      @Override protected void configureWindow(java.awt.Window root) {
@@ -250,24 +249,19 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
      * Main method launching the application.
      */
     public static void main(String[] args){
-        Toolkit xToolkit = Toolkit.getDefaultToolkit();
-        java.lang.reflect.Field awtAppClassNameField;
         try {
-            awtAppClassNameField = xToolkit.getClass().getDeclaredField("awtAppClassName");
-            awtAppClassNameField.setAccessible(true);
-            try {
-                awtAppClassNameField.set(xToolkit, "mysqljavacat");
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } catch (NoSuchFieldException ex) {
-            Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(MysqlJavaCatApp.class.getName()).log(Level.SEVERE, null, ex);
+            Field awtAppClassName = Toolkit.getDefaultToolkit().getClass().getDeclaredField("awtAppClassName");
+            awtAppClassName.setAccessible(true);
+            awtAppClassName.set(null, "mysqljavacat");
+
         }
-        
+        catch (NoSuchFieldException e) {
+        // it seems we are not in X, nothing to do for now
+        }
+        catch (IllegalAccessException e) {
+            throw new AssertionError("we've set the field accessible, this shouldn't happen");
+        }
+
         launch(MysqlJavaCatApp.class, args);
     }
     public static Frame getFrameFor(Component comp) {

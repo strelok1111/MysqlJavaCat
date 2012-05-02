@@ -1,6 +1,6 @@
 [Setup]
 AppName=MysqlJavaCat
-AppVersion=0.2.17
+AppVersion=0.2.18
 DefaultDirName={pf}\MysqlJavaCat
 DefaultGroupName=MysqlJavaCat
 OutputDir=Z:\var\projects\MysqlJavaCat\Win
