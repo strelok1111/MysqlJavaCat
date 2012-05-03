@@ -9,5 +9,6 @@ iscc Win/Mysqljavacat_lin.iss
 cp -R dist/* deb_dist/usr/share/MysqlJavaCat
 cp src/mysqljavacat/resources/about.png deb_dist/usr/share/MysqlJavaCat/MysqlJavaCat.png
 chmod +x deb_dist/usr/share/MysqlJavaCat/MysqlJavaCat.jar
+rm Win/MysqlJavaCat.exe
 dpkg-deb -b deb_dist
 mv deb_dist.deb MysqlJavaCat.deb
