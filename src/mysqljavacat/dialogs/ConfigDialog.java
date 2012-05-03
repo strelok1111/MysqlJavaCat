@@ -11,11 +11,12 @@
 
 package mysqljavacat.dialogs;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.prefs.Preferences;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
@@ -41,6 +42,7 @@ public class ConfigDialog extends javax.swing.JDialog {
         cur_con.SSHUser = sshUser.getText();
         cur_con.SSHPass = new String(sshPass.getPassword());                
         cur_con.UseSSH = useSSHTun.isSelected();   
+        cur_con.charset = (String)connectionCharset.getSelectedItem();
         cur_con.save();
     }
     public void saveConnectionAndProps(){
@@ -57,6 +59,7 @@ public class ConfigDialog extends javax.swing.JDialog {
         sshUser.setText(cur_con.SSHUser);
         sshPass.setText(cur_con.SSHPass);
         useSSHTun.setSelected(cur_con.UseSSH);
+        connectionCharset.setSelectedItem(cur_con.charset);
         
     }
 
@@ -114,6 +117,11 @@ public class ConfigDialog extends javax.swing.JDialog {
         sshHost.addKeyListener(input_listener);
         sshUser.addKeyListener(input_listener);
         sshPass.addKeyListener(input_listener);
+        connectionCharset.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent ie) {
+                saveCon.setEnabled(true);
+            }
+        });
         useSSHTun.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 saveCon.setEnabled(true);
@@ -161,6 +169,8 @@ public class ConfigDialog extends javax.swing.JDialog {
         DeleteCon = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         editConName = new javax.swing.JButton();
+        connectionCharset = new javax.swing.JComboBox();
+        jLabel9 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setName("Form"); // NOI18N
@@ -374,6 +384,12 @@ public class ConfigDialog extends javax.swing.JDialog {
             }
         });
 
+        connectionCharset.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "utf-8", "cp1251" }));
+        connectionCharset.setName("connectionCharset"); // NOI18N
+
+        jLabel9.setText(resourceMap.getString("jLabel9.text")); // NOI18N
+        jLabel9.setName("jLabel9"); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -401,7 +417,12 @@ public class ConfigDialog extends javax.swing.JDialog {
                         .addComponent(cancelButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(testConnection))
-                    .addComponent(connectOnStartup))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(jLabel9)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(connectionCharset, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(connectOnStartup)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -419,6 +440,10 @@ public class ConfigDialog extends javax.swing.JDialog {
                     .addComponent(editConName))
                 .addGap(18, 18, 18)
                 .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(connectionCharset, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(connectOnStartup)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -426,7 +451,7 @@ public class ConfigDialog extends javax.swing.JDialog {
                     .addComponent(okButton)
                     .addComponent(cancelButton)
                     .addComponent(testConnection))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -524,6 +549,7 @@ public class ConfigDialog extends javax.swing.JDialog {
     private javax.swing.JButton cancelButton;
     private javax.swing.JComboBox connectCombo;
     private javax.swing.JCheckBox connectOnStartup;
+    private javax.swing.JComboBox connectionCharset;
     private javax.swing.JButton editConName;
     private javax.swing.JTextField hostField;
     private javax.swing.JLabel jLabel1;
@@ -534,6 +560,7 @@ public class ConfigDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JTabbedPane jTabbedPane1;

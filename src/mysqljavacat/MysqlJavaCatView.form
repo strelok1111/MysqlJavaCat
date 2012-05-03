@@ -112,11 +112,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cancelButtonActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JToolBar$Separator" name="jSeparator1">
-              <Properties>
-                <Property name="name" type="java.lang.String" value="jSeparator1" noResource="true"/>
-              </Properties>
-            </Component>
             <Component class="javax.swing.JButton" name="jButton1">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" resourceKey="jButton1.icon"/>
@@ -131,6 +126,11 @@
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
               </Events>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="jSeparator2">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator2" noResource="true"/>
+              </Properties>
             </Component>
           </SubComponents>
         </Container>

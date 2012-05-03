@@ -508,8 +508,8 @@ public class MysqlJavaCatView extends FrameView {
         databaseCombo = new javax.swing.JComboBox();
         RunButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
-        jSeparator1 = new javax.swing.JToolBar.Separator();
         jButton1 = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JToolBar.Separator();
         jSplitPane1 = new javax.swing.JSplitPane();
         horisontalSplit = new javax.swing.JSplitPane();
         jTabbedPane1 = new javax.swing.JTabbedPane();
@@ -545,7 +545,6 @@ public class MysqlJavaCatView extends FrameView {
 
         mainPanel.setName("mainPanel"); // NOI18N
 
-        jToolBar3.setBorder(null);
         jToolBar3.setRollover(true);
         jToolBar3.setName("jToolBar3"); // NOI18N
 
@@ -620,9 +619,6 @@ public class MysqlJavaCatView extends FrameView {
         });
         jToolBar3.add(cancelButton);
 
-        jSeparator1.setName("jSeparator1"); // NOI18N
-        jToolBar3.add(jSeparator1);
-
         jButton1.setIcon(resourceMap.getIcon("jButton1.icon")); // NOI18N
         jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
         jButton1.setToolTipText(resourceMap.getString("jButton1.toolTipText")); // NOI18N
@@ -637,6 +633,9 @@ public class MysqlJavaCatView extends FrameView {
             }
         });
         jToolBar3.add(jButton1);
+
+        jSeparator2.setName("jSeparator2"); // NOI18N
+        jToolBar3.add(jSeparator2);
 
         jSplitPane1.setBorder(null);
         jSplitPane1.setName("jSplitPane1"); // NOI18N
@@ -685,7 +684,7 @@ public class MysqlJavaCatView extends FrameView {
                 .addComponent(requestTime)
                 .addGap(231, 231, 231)
                 .addComponent(rowCount)
-                .addContainerGap(433, Short.MAX_VALUE))
+                .addContainerGap(432, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -701,12 +700,12 @@ public class MysqlJavaCatView extends FrameView {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 676, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 675, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 395, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -726,11 +725,11 @@ public class MysqlJavaCatView extends FrameView {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 676, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab(resourceMap.getString("jPanel3.TabConstraints.tabTitle"), jPanel3); // NOI18N
@@ -764,11 +763,11 @@ public class MysqlJavaCatView extends FrameView {
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(treePane, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+            .addComponent(treePane, javax.swing.GroupLayout.PREFERRED_SIZE, 22, Short.MAX_VALUE)
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(treePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 483, Short.MAX_VALUE)
+            .addComponent(treePane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE)
         );
 
         jSplitPane1.setLeftComponent(jPanel4);
@@ -785,7 +784,7 @@ public class MysqlJavaCatView extends FrameView {
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addComponent(jToolBar3, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 483, Short.MAX_VALUE))
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -1224,7 +1223,7 @@ public class MysqlJavaCatView extends FrameView {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JToolBar.Separator jSeparator1;
+    private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JToolBar jToolBar3;

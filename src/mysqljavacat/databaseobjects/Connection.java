@@ -20,6 +20,7 @@ public class Connection{
     public String SSHPass;
     public String SSHHost;
     public String SSHUser;
+    public String charset = "utf-8";
     public boolean UseSSH = false;
     
     

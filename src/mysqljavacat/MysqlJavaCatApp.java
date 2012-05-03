@@ -96,13 +96,14 @@ public class MysqlJavaCatApp extends SingleFrameApplication {
     }
     public Connection setupConnection(mysqljavacat.databaseobjects.Connection con) throws SQLException,ClassNotFoundException{
         Class.forName("com.mysql.jdbc.Driver");
-        String dsn = "jdbc:mysql://" + con.dbHost + ":" + con.dbPort;
+        String dsn = "jdbc:mysql://" + con.dbHost + ":" + con.dbPort + "?characterEncoding=" + con.charset;
         if(con.UseSSH){
             dsn = dsn
             + "?socketFactory=SSHSocketFactory"
             + "&SSHHost=" + con.SSHHost
             + "&SSHUser=" + con.SSHUser
-            + "&SSHPassword=" + con.SSHPass;
+            + "&SSHPassword=" + con.SSHPass
+            + "&characterEncoding=" + con.charset;
         }
         return DriverManager.getConnection(dsn,con.dbUser, con.dbPassword);
     }
