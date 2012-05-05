@@ -71,14 +71,10 @@ public class DatabaseObj implements CompleteObj {
         
         if(isSet && !force) return;
 
-        tables.clear();
-
         MysqlJavaCatView view = MysqlJavaCatApp.getApplication().getView();
         ArrayList<MutableTreeNode> childs = new ArrayList<MutableTreeNode>();
         for(int i = 0;i < node.getChildCount();i = i + 1)
             childs.add((MutableTreeNode)node.getChildAt(i));
-        for(MutableTreeNode n : childs)
-            ((DefaultTreeModel)view.getDbTree().getModel()).removeNodeFromParent(n);
 
         ArrayList<ArrayList<Object>> fields_list;
         if(with_fields){
@@ -105,5 +101,6 @@ public class DatabaseObj implements CompleteObj {
                 ((DefaultTreeModel)view.getDbTree().getModel()).insertNodeInto(field_node, table_node, table_node.getChildCount());
             }
         }
+        ((DefaultTreeModel)view.getDbTree().getModel()).reload(node);
     }
 }

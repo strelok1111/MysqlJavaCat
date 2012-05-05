@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListSelectionModel;
@@ -132,7 +133,9 @@ public class MysqlJavaCatView extends FrameView {
         DatabaseTree.setModel(null);
         DatabaseTree.setCellRenderer(cell);
         DatabaseTree.setRootVisible(false);
-        DatabaseTree.setShowsRootHandles(true);        
+        DatabaseTree.setShowsRootHandles(true); 
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Databases");
+        DatabaseTree.setModel(new DefaultTreeModel(rootNode));
         propText.setContentType("text/sql");
         propText.setEditable(false);
         propText.setEnabled(true);
@@ -339,9 +342,7 @@ public class MysqlJavaCatView extends FrameView {
                                 Task task = new Task(application) {
                                     @Override
                                     protected Object doInBackground() throws Exception {
-                                        DatabaseTree.setEnabled(false);
                                         selected_db.refreshDatabase(true,true);
-                                        DatabaseTree.setEnabled(true);
                                         return null;
                                     }
                                 };
@@ -1083,10 +1084,18 @@ public class MysqlJavaCatView extends FrameView {
             Task task = new Task(application) {
                 @Override
                 protected Object doInBackground() throws Exception {
-                    DatabaseTree.setEnabled(false);
                     selected_db.refreshDatabase(true,false);
-                    DatabaseTree.setEnabled(true);
-                    ((DefaultTreeModel)DatabaseTree.getModel()).reload((DefaultMutableTreeNode)DatabaseTree.getModel().getRoot());
+                    DefaultMutableTreeNode root_node = (DefaultMutableTreeNode)DatabaseTree.getModel().getRoot();
+                    DefaultMutableTreeNode database_node = root_node;
+                    Enumeration childs = root_node.children();
+                    while(childs.hasMoreElements()){
+                        DefaultMutableTreeNode current = (DefaultMutableTreeNode)childs.nextElement();
+                        if(((DatabaseObj)current.getUserObject()) == selected_db){
+                            database_node = current;
+                            break;
+                        }
+                    }
+                    ((DefaultTreeModel)DatabaseTree.getModel()).reload(database_node);
                     return null;
                 }
             };
@@ -1167,42 +1176,40 @@ public class MysqlJavaCatView extends FrameView {
         connectButtonActionPerformed(null);
     }
     private void updateTree(){                
-                Task task = new Task(application) {
-                    @Override
-                    protected Object doInBackground() throws Exception {
-                        DatabaseTree.setModel(null);
-                        DatabaseTree.setEnabled(false);
-                        RunButton.setEnabled(false);
-                        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Databases");
-                        DatabaseTree.setModel(new DefaultTreeModel(rootNode));
-                        DefaultComboBoxModel combo_model = new DefaultComboBoxModel();
-                        ArrayList<ArrayList<Object>> all_databases  =  application.getRows(application.executeSql("SHOW DATABASES"));
-                        for(ArrayList<Object> row :  all_databases){
-                            DefaultMutableTreeNode databaseNode = new DefaultMutableTreeNode();
-                            DatabaseObj database = new DatabaseObj(row.get(0).toString(),databaseNode);
-                            databaseNode.setUserObject(database);
-                            combo_model.addElement(database);
-                            rootNode.add(databaseNode);
-                            selected_db = database;
-                            databases.put(database.toString(), database);
-                        }
-                        ((DefaultTreeModel)DatabaseTree.getModel()).reload();                       
-                        for(ArrayList<Object> row :  all_databases){
-                            setMessage("Database scan:" + row.get(0).toString());
-                            databases.get(row.get(0).toString()).refreshDatabase(false,false);
-                        }
-                        databaseCombo.setModel(combo_model);
-                        DatabaseTree.setEnabled(true);
-                        connectButton.setEnabled(false);
-                        disconnectButton.setEnabled(true);
-                        databaseCombo.setEnabled(true);
-                        RunButton.setEnabled(true);
-                        combo_model.setSelectedItem(selected_db);
-                        return null;
+        Task task = new Task(application) {
+            @Override
+            protected Object doInBackground() throws Exception {               
+                RunButton.setEnabled(false);
+                DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)DatabaseTree.getModel().getRoot();
+                DefaultComboBoxModel combo_model = (DefaultComboBoxModel)databaseCombo.getModel();
+                ArrayList<ArrayList<Object>> all_databases  =  application.getRows(application.executeSql("SHOW DATABASES"));
+                for(ArrayList<Object> row :  all_databases){
+                    if(databases.get(row.get(0).toString()) == null){
+                        DefaultMutableTreeNode databaseNode = new DefaultMutableTreeNode();
+                        DatabaseObj database = new DatabaseObj(row.get(0).toString(),databaseNode);
+                        databaseNode.setUserObject(database);
+                        combo_model.addElement(database);
+                        rootNode.add(databaseNode);
+                        selected_db = database;
+                        databases.put(database.toString(), database);
                     }
-                };
-                application.getContext().getTaskService().execute(task);
-                application.getContext().getTaskMonitor().setForegroundTask(task);                     
+                    
+                }
+                ((DefaultTreeModel)DatabaseTree.getModel()).reload();
+                for(ArrayList<Object> row :  all_databases){
+                    setMessage("Database scan:" + row.get(0).toString());
+                            databases.get(row.get(0).toString()).refreshDatabase(false,false);
+                }          
+                connectButton.setEnabled(false);
+                disconnectButton.setEnabled(true);
+                RunButton.setEnabled(true);
+                databaseCombo.setEnabled(true);
+                combo_model.setSelectedItem(selected_db);
+                return null;
+            }
+        };
+        application.getContext().getTaskService().execute(task);
+        application.getContext().getTaskMonitor().setForegroundTask(task);                     
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTree DatabaseTree;
