@@ -1,5 +1,7 @@
 package mysqljavacat;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mysqljavacat.dialogs.MysqlJavaCatAboutBox;
 import mysqljavacat.databaseobjects.DatabaseObj;
 import mysqljavacat.databaseobjects.TableObj;
@@ -43,7 +45,6 @@ import javax.swing.JTree;
 import javax.swing.MenuElement;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -67,9 +68,12 @@ public class MysqlJavaCatView extends FrameView {
     private final Icon[] busyIcons = new Icon[15];
     private int busyIconIndex = 0;
     private Task queryTask;
+    private TableObj currentTable;
 
     private JDialog aboutBox;
     private JDialog confDialog;
+    private ResultTable dataTable;
+    private ResultTable resultTable;
 
 
     public SqlTabbedPane getTabsMain(){
@@ -82,7 +86,7 @@ public class MysqlJavaCatView extends FrameView {
     public HashMap<String,DatabaseObj> getDbMap(){
         return databases;
     }
-    public JTable getResultTable(){
+    public ResultTable getResultTable(){
         return resultTable;
     }
 
@@ -97,6 +101,12 @@ public class MysqlJavaCatView extends FrameView {
         super(app);        
         DefaultSyntaxKit.initKit();
         initComponents();
+        dataTable = new ResultTable();
+        dataTable.setModel(new DefaultTableModel());
+        jScrollPane3.setViewportView(dataTable);
+        resultTable = new ResultTable();
+        resultTable.setModel(new DefaultTableModel());       
+        jScrollPane2.setViewportView(resultTable);
         jTabbedPane1.setSelectedIndex(0);
         getFrame().setTitle("Mysql Java Based Object Browser");
         getFrame().setIconImage(new ImageIcon(getClass().getResource("/mysqljavacat/resources/ledicons/databases.png")).getImage());
@@ -126,16 +136,12 @@ public class MysqlJavaCatView extends FrameView {
             }
         });
 
-        resultTable.setDragEnabled(false);
-        resultTable.setDefaultRenderer(Object.class,new ColoredTableCellRenderer());
-
         DatabaseTreeCellRender cell = new DatabaseTreeCellRender();
-        DatabaseTree.setModel(null);
-        DatabaseTree.setCellRenderer(cell);
-        DatabaseTree.setRootVisible(false);
-        DatabaseTree.setShowsRootHandles(true); 
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Databases");
         DatabaseTree.setModel(new DefaultTreeModel(rootNode));
+        DatabaseTree.setCellRenderer(cell);
+        DatabaseTree.setRootVisible(false);
+        DatabaseTree.setShowsRootHandles(true);
         propText.setContentType("text/sql");
         propText.setEditable(false);
         propText.setEnabled(true);
@@ -366,7 +372,7 @@ public class MysqlJavaCatView extends FrameView {
             }
             @Override
             public void mouseClicked(MouseEvent e){
-                if(e.getClickCount() == 2){
+               
                     int x = e.getX();
                     int y = e.getY();
                     JTree tree = (JTree)e.getSource();                    
@@ -376,23 +382,26 @@ public class MysqlJavaCatView extends FrameView {
                     tree.setSelectionPath(path);
                     final DefaultMutableTreeNode node =(DefaultMutableTreeNode)path.getLastPathComponent();
                     if(node.getUserObject().getClass() == TableObj.class){
-                        String text = tabs.getSelectedtab().getEditPane().getText();
-                        text.replace("\r\n", "\n");
-                        String before_caret = text.substring(0,tabs.getSelectedtab().getEditPane().getCaretPosition());
-                        String after_caret = text.substring(tabs.getSelectedtab().getEditPane().getCaretPosition(),text.length());
-                        text = before_caret + node.getUserObject().toString() + after_caret;                        
-                        text.replace("\n", "\r\n");
-                        tabs.getSelectedtab().getEditPane().setText(text);
-                        tabs.getSelectedtab().getEditPane().requestFocusInWindow();
-                        
+                        if(e.getClickCount() == 2){
+                            String text = tabs.getSelectedtab().getEditPane().getText();
+                            text.replace("\r\n", "\n");
+                            String before_caret = text.substring(0,tabs.getSelectedtab().getEditPane().getCaretPosition());
+                            String after_caret = text.substring(tabs.getSelectedtab().getEditPane().getCaretPosition(),text.length());
+                            text = before_caret + node.getUserObject().toString() + after_caret;                        
+                            text.replace("\n", "\r\n");
+                            tabs.getSelectedtab().getEditPane().setText(text);
+                            tabs.getSelectedtab().getEditPane().requestFocusInWindow();
+                        }else{
+                            currentTable = (TableObj)node.getUserObject();
+                            currentTable.refereshTable();
+                            if(dataPanel.isVisible()) dataPanelComponentShown(null);  
+                        }
                         //TODO Prevent tree expand && set caret pos
                         //tabs.getSelectedtab().getEditPane().setCaretPosition(tabs.getSelectedtab().getEditPane().getCaretPosition());
                         //DatabaseTree.setToggleClickCount(0);
                      }
 
-                }
             }
-
 
         };
         DatabaseTree.addKeyListener(new KeyAdapter() {
@@ -421,7 +430,7 @@ public class MysqlJavaCatView extends FrameView {
         });
         DatabaseTree.addMouseListener(ma);
         databaseCombo.setModel(new DefaultComboBoxModel());
-        resultTable.setModel(new javax.swing.table.DefaultTableModel());
+        resultTable.setModel(new DefaultTableModel());
         treePane.setEnabled(false);        
 
         // status bar initialization - message timeout, idle icon and busy animation, etc
@@ -515,11 +524,13 @@ public class MysqlJavaCatView extends FrameView {
         horisontalSplit = new javax.swing.JSplitPane();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        resultTable = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         requestTime = new javax.swing.JLabel();
         rowCount = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        dataPanel = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         propText = new javax.swing.JEditorPane();
@@ -650,24 +661,6 @@ public class MysqlJavaCatView extends FrameView {
 
         jPanel1.setName("jPanel1"); // NOI18N
 
-        jScrollPane2.setBorder(null);
-        jScrollPane2.setName("jScrollPane2"); // NOI18N
-
-        resultTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        resultTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        resultTable.setName("resultTable"); // NOI18N
-        jScrollPane2.setViewportView(resultTable);
-
         jPanel2.setName("jPanel2"); // NOI18N
 
         requestTime.setText(resourceMap.getString("requestTime.text")); // NOI18N
@@ -696,6 +689,8 @@ public class MysqlJavaCatView extends FrameView {
                 .addContainerGap())
         );
 
+        jScrollPane2.setName("jScrollPane2"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -712,6 +707,45 @@ public class MysqlJavaCatView extends FrameView {
         );
 
         jTabbedPane1.addTab(resourceMap.getString("jPanel1.TabConstraints.tabTitle"), jPanel1); // NOI18N
+
+        dataPanel.setName("dataPanel"); // NOI18N
+        dataPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                dataPanelComponentShown(evt);
+            }
+        });
+
+        jPanel5.setName("jPanel5"); // NOI18N
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 675, Short.MAX_VALUE)
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 35, Short.MAX_VALUE)
+        );
+
+        jScrollPane3.setName("jScrollPane3"); // NOI18N
+
+        javax.swing.GroupLayout dataPanelLayout = new javax.swing.GroupLayout(dataPanel);
+        dataPanel.setLayout(dataPanelLayout);
+        dataPanelLayout.setHorizontalGroup(
+            dataPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 675, Short.MAX_VALUE)
+        );
+        dataPanelLayout.setVerticalGroup(
+            dataPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(dataPanelLayout.createSequentialGroup()
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 365, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab(resourceMap.getString("dataPanel.TabConstraints.tabTitle"), dataPanel); // NOI18N
 
         jPanel3.setName("jPanel3"); // NOI18N
 
@@ -989,54 +1023,11 @@ public class MysqlJavaCatView extends FrameView {
                 Long milisec = System.currentTimeMillis() - time;
                 tab.setRequestTime(milisec);
                 Float sec = milisec.floatValue() / 1000;                
-                javax.swing.table.DefaultTableModel defaultColumnModel = new javax.swing.table.DefaultTableModel();
-                int size = 0;
-                if(res.getClass() == com.mysql.jdbc.JDBC4ResultSet.class){
-                    setMessage("Fetching Result");
-                    r1 = (ResultSet)res;
-                    int col_count = r1.getMetaData().getColumnCount();
-                    for(int i = 1;i <= col_count;i = i + 1){
-                        defaultColumnModel.addColumn(r1.getMetaData().getColumnLabel(i));
-                    }
-                    while(r1.next()){                        
-                        Object [] arr = new Object[col_count];
-                        for(int i = 1; i <= col_count ; i = i + 1){
-                            Object obj = null;
-                            try{
-                                obj = r1.getObject(i);
-                            }catch(SQLException e){
-                                obj = "0000-00-00";
-                            }
-                            try{
-                                byte[] b = (byte[])obj;
-                                obj = new String(b);
-                            }catch(Exception e){
-                            }
-                            arr[i-1] = obj;
-                        }
-                        defaultColumnModel.addRow(arr);
-                        size = size + 1;
-                    }                    
-                }else{
-                    defaultColumnModel.addColumn("Rows Affected");
-                    ArrayList<Object> single_cell = new ArrayList<Object>();
-                    single_cell.add(res);
-                    size = 1;
-                    defaultColumnModel.addRow(single_cell.toArray());
-                }
-                tab.setRowCount(size);
-                
-                if(tabs.getSelectedtab() == tab){
-                    resultTable.setModel(defaultColumnModel);
-                    rowCount.setText("Row count: " + new Integer(size).toString());
-                    requestTime.setText("Request time: " + sec.toString() + " sec");
-                    TableColumnModel columns = resultTable.getColumnModel();
-                    for (int i = columns.getColumnCount() - 1; i >= 0; --i){
-                        columns.getColumn(i).setPreferredWidth(200);
-                    }
-                }
-                tab.setResultColModel(defaultColumnModel);
-                resultTable.getTableHeader().setReorderingAllowed(false);
+                resultTable.loadResult(res);
+                tab.setRowCount(resultTable.getModel().getRowCount());
+                rowCount.setText("Row count: " + new Integer(resultTable.getModel().getRowCount()).toString());
+                requestTime.setText("Request time: " + sec.toString() + " sec");                  
+                tab.setResultColModel(resultTable.getModel());                
                 return null;
             }
             @Override
@@ -1073,13 +1064,16 @@ public class MysqlJavaCatView extends FrameView {
         connectButton.setEnabled(true);
         RunButton.setEnabled(false);
         databaseCombo.setEnabled(false);
-        DatabaseTree.setModel(null);
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Databases");
+        DatabaseTree.setModel(new DefaultTreeModel(rootNode));
+        databases.clear();
         databaseCombo.setModel(new DefaultComboBoxModel());
     }//GEN-LAST:event_disconnectButtonActionPerformed
 
     private void databaseComboItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_databaseComboItemStateChanged
         if(evt.getStateChange() == java.awt.event.ItemEvent.SELECTED){
             application.executeSql("USE " + evt.getItem().toString());
+            currentTable = null;
             selected_db = (DatabaseObj)evt.getItem();
             Task task = new Task(application) {
                 @Override
@@ -1172,9 +1166,38 @@ public class MysqlJavaCatView extends FrameView {
         dialog.setVisible(true);
     }//GEN-LAST:event_openMenuActionPerformed
 
+    private void dataPanelComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_dataPanelComponentShown
+        System.out.println(currentTable);
+        if(currentTable == null) return;
+        Statement stmt = null;
+        try {
+            stmt = application.getConnection().createStatement();
+            stmt.setFetchSize(Integer.MIN_VALUE);
+        } catch (SQLException ex) {
+            Logger.getLogger(MysqlJavaCatView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Object res = null;        
+        try{
+            if(stmt.execute("SELECT * FROM " + currentTable.getName() + " LIMIT 1000")){
+                res = stmt.getResultSet();
+            }                    
+        }catch(SQLException e){                    
+            dataTable.setModel(new DefaultTableModel());
+            if(e.getErrorCode() != 1317){
+                application.showError(e.getMessage());
+            }
+        }              
+        try {
+            dataTable.loadResult(res);
+        } catch (Exception ex) {
+            Logger.getLogger(MysqlJavaCatView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_dataPanelComponentShown
+
     public void proxyRunConnect(){
         connectButtonActionPerformed(null);
     }
+    
     private void updateTree(){                
         Task task = new Task(application) {
             @Override
@@ -1216,6 +1239,7 @@ public class MysqlJavaCatView extends FrameView {
     private javax.swing.JButton RunButton;
     private javax.swing.JButton cancelButton;
     private javax.swing.JButton connectButton;
+    private javax.swing.JPanel dataPanel;
     private javax.swing.JComboBox databaseCombo;
     private javax.swing.JButton disconnectButton;
     private javax.swing.JSplitPane horisontalSplit;
@@ -1228,8 +1252,10 @@ public class MysqlJavaCatView extends FrameView {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
@@ -1240,7 +1266,6 @@ public class MysqlJavaCatView extends FrameView {
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JEditorPane propText;
     private javax.swing.JLabel requestTime;
-    private javax.swing.JTable resultTable;
     private javax.swing.JLabel rowCount;
     private javax.swing.JMenuItem saveAsMenu;
     private javax.swing.JMenuItem saveMenu;

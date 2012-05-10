@@ -32,6 +32,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -44,7 +45,7 @@ public class SqlTab extends JScrollPane{
     private JPanel tab_header;
     private SqlTabbedPane sqlTab;
     private ComboDialog combo_dialog;
-    private DefaultTableModel result_col_model;
+    private TableModel result_col_model;
     private Long request_time;
     private Integer row_count;
     private File file;
@@ -53,7 +54,7 @@ public class SqlTab extends JScrollPane{
     private boolean saved = false;
     private Preferences tabPref;
     
-    public void setResultColModel(DefaultTableModel model){
+    public void setResultColModel(TableModel model){
         result_col_model = model;
     }
     
@@ -79,7 +80,7 @@ public class SqlTab extends JScrollPane{
         saved = true;
         tab_label.setFont(savedfont);
     }
-    public DefaultTableModel getResultColModel(){
+    public TableModel getResultColModel(){
         return result_col_model;
     }
     public void setRequestTime(Long rt){
